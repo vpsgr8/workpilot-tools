@@ -1,0 +1,3 @@
+# Static deployment notes
+# Publish this directory as the site root. The entry file is index.html.
+# Keep the tools/ directory beside index.html so links such as tools/pdf-merge.html resolve correctly.

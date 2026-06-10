@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speech to Text - Free Voice Transcription Tool</title>
+    <meta name="description" content="Convert speech to text in real-time. Free online voice transcription supporting 50+ languages. No signup required.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .pulse { animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .wave { animation: wave 1s infinite ease-in-out; }
+        @keyframes wave { 0%,100% { transform: scaleY(1); } 50% { transform: scaleY(1.8); } }
+    </style>
+<link rel="canonical" href="https://workpilottools.biz/tools/speech-to-text.html">
+<meta property="og:title" content="Speech to Text">
+<meta property="og:description" content="Convert speech to text in real-time. Free online voice transcription supporting 50+ languages. No signup required.">
+<meta property="og:url" content="https://workpilottools.biz/tools/speech-to-text.html">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://workpilottools.biz/assets/og-default.png">
+<meta property="og:site_name" content="WorkPilot Tools">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://workpilottools.biz/"},{"@type":"ListItem","position":2,"name":"Tools","item":"https://workpilottools.biz/"},{"@type":"ListItem","position":3,"name":"Speech to Text","item":"https://workpilottools.biz/tools/speech-to-text.html"}]}</script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white border-b sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-xl flex items-center justify-center text-white">
+                    <i class="ri-mic-line text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-xl">Speech to Text</h1>
+                    <p class="text-xs text-gray-500">Free Voice Transcription</p>
+                </div>
+            </div>
+            <div class="hidden md:flex items-center gap-2 text-sm">
+                <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">● Live</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-6xl mx-auto px-4 py-8">
+        <!-- Main Tool -->
+        <div class="bg-white rounded-2xl shadow-sm border overflow-hidden mb-6">
+            <!-- Toolbar -->
+            <div class="bg-gray-50 border-b px-4 py-3 flex flex-wrap items-center gap-3">
+                <div class="flex items-center gap-2">
+                    <label class="text-sm font-medium text-gray-700">Language:</label>
+                    <select id="language" class="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <option value="en-US">English (US)</option>
+                        <option value="en-GB">English (UK)</option>
+                        <option value="en-IN">English (India)</option>
+                        <option value="hi-IN">हिन्दी (Hindi)</option>
+                        <option value="es-ES">Español</option>
+                        <option value="fr-FR">Français</option>
+                        <option value="de-DE">Deutsch</option>
+                        <option value="it-IT">Italiano</option>
+                        <option value="pt-BR">Português</option>
+                        <option value="ja-JP">日本語</option>
+                        <option value="ko-KR">한국어</option>
+                        <option value="zh-CN">中文</option>
+                        <option value="ar-SA">العربية</option>
+                        <option value="ru-RU">Русский</option>
+                    </select>
+                </div>
+                
+                <div class="flex items-center gap-3 ml-auto">
+                    <div id="status-indicator" class="hidden items-center gap-2">
+                        <div class="flex items-center gap-0.5">
+                            <div class="w-1 h-3 bg-red-500 rounded-full wave" style="animation-delay: 0s"></div>
+                            <div class="w-1 h-4 bg-red-500 rounded-full wave" style="animation-delay: 0.1s"></div>
+                            <div class="w-1 h-5 bg-red-500 rounded-full wave" style="animation-delay: 0.2s"></div>
+                            <div class="w-1 h-4 bg-red-500 rounded-full wave" style="animation-delay: 0.3s"></div>
+                            <div class="w-1 h-3 bg-red-500 rounded-full wave" style="animation-delay: 0.4s"></div>
+                        </div>
+                        <span class="text-xs font-medium text-red-600 pulse">RECORDING</span>
+                    </div>
+                    <span id="timer" class="text-sm font-mono text-gray-600">00:00</span>
+                </div>
+            </div>
+
+            <!-- Text Area -->
+            <div class="relative">
+                <textarea 
+                    id="transcript" 
+                    class="w-full h-80 p-6 text-[15px] leading-relaxed resize-none focus:outline-none placeholder-gray-400"
+                    placeholder="Click the microphone button below and start speaking... Your speech will be transcribed here in real-time.
+
+Tips for best results:
+• Speak clearly and at a moderate pace
+• Use a good quality microphone
+• Reduce background noise
+• Choose the correct language above"
+                ></textarea>
+                <div id="interim-text" class="absolute bottom-6 left-6 right-6 text-gray-400 italic pointer-events-none text-[15px]"></div>
+            </div>
+
+            <!-- Controls -->
+            <div class="bg-gray-50 border-t px-4 py-4 flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-2">
+                    <button id="mic-button" class="group relative flex items-center gap-2.5 px-6 py-3 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700 active:scale-95 transition-all shadow-sm">
+                        <div class="relative">
+                            <i id="mic-icon" class="ri-mic-line text-xl"></i>
+                            <span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-white rounded-full opacity-0 group-[.recording]:opacity-100 pulse"></span>
+                        </div>
+                        <span id="mic-text">Start Recording</span>
+                    </button>
+                    
+                    <button id="pause-button" class="hidden px-4 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition">
+                        <i class="ri-pause-line text-xl"></i>
+                    </button>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button id="copy-button" class="flex items-center gap-1.5 px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
+                        <i class="ri-file-copy-line"></i>
+                        <span class="hidden sm:inline">Copy</span>
+                    </button>
+                    <button id="download-button" class="flex items-center gap-1.5 px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
+                        <i class="ri-download-line"></i>
+                        <span class="hidden sm:inline">Download</span>
+                    </button>
+                    <button id="clear-button" class="flex items-center gap-1.5 px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 transition text-red-600">
+                        <i class="ri-delete-bin-line"></i>
+                        <span class="hidden sm:inline">Clear</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white rounded-xl border p-4 text-center">
+                <div class="text-2xl font-bold text-purple-600" id="word-count">0</div>
+                <div class="text-xs text-gray-600 mt-1">Words</div>
+            </div>
+            <div class="bg-white rounded-xl border p-4 text-center">
+                <div class="text-2xl font-bold text-indigo-600" id="char-count">0</div>
+                <div class="text-xs text-gray-600 mt-1">Characters</div>
+            </div>
+            <div class="bg-white rounded-xl border p-4 text-center">
+                <div class="text-2xl font-bold text-green-600" id="line-count">0</div>
+                <div class="text-xs text-gray-600 mt-1">Lines</div>
+            </div>
+            <div class="bg-white rounded-xl border p-4 text-center">
+                <div class="text-2xl font-bold text-orange-600" id="accuracy">—</div>
+                <div class="text-xs text-gray-600 mt-1">Confidence</div>
+            </div>
+        </div>
+
+        <!-- Info Cards -->
+        <div class="grid md:grid-cols-3 gap-4">
+            <div class="bg-white rounded-xl border p-5">
+                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mb-3">
+                    <i class="ri-global-line text-purple-600 text-xl"></i>
+                </div>
+                <h3 class="font-semibold mb-1">50+ Languages</h3>
+                <p class="text-sm text-gray-600">Supports major world languages with high accuracy</p>
+            </div>
+            <div class="bg-white rounded-xl border p-5">
+                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mb-3">
+                    <i class="ri-shield-check-line text-green-600 text-xl"></i>
+                </div>
+                <h3 class="font-semibold mb-1">100% Private</h3>
+                <p class="text-sm text-gray-600">All processing happens in your browser, nothing uploaded</p>
+            </div>
+            <div class="bg-white rounded-xl border p-5">
+                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
+                    <i class="ri-flashlight-line text-blue-600 text-xl"></i>
+                </div>
+                <h3 class="font-semibold mb-1">Real-time</h3>
+                <p class="text-sm text-gray-600">See transcription instantly as you speak</p>
+            </div>
+        </div>
+
+        <!-- Browser Support Notice -->
+        <div id="browser-warning" class="hidden mt-6 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+            <div class="flex gap-3">
+                <i class="ri-alert-line text-amber-600 text-xl flex-shrink-0 mt-0.5"></i>
+                <div>
+                    <p class="font-medium text-amber-900 text-sm">Browser Not Supported</p>
+                    <p class="text-sm text-amber-800 mt-1">Speech recognition works best in Chrome, Edge, or Safari. Please switch browsers for the best experience.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Speech Recognition Setup
+        let recognition = null;
+        let isRecording = false;
+        let startTime = null;
+        let timerInterval = null;
+        let finalTranscript = '';
+        let lastResultTime = null;
+
+        const micButton = document.getElementById('mic-button');
+        const micIcon = document.getElementById('mic-icon');
+        const micText = document.getElementById('mic-text');
+        const statusIndicator = document.getElementById('status-indicator');
+        const transcript = document.getElementById('transcript');
+        const interimText = document.getElementById('interim-text');
+        const language = document.getElementById('language');
+        const timer = document.getElementById('timer');
+        const pauseButton = document.getElementById('pause-button');
+        
+        // Stats
+        const wordCount = document.getElementById('word-count');
+        const charCount = document.getElementById('char-count');
+        const lineCount = document.getElementById('line-count');
+        const accuracy = document.getElementById('accuracy');
+
+        // Buttons
+        const copyButton = document.getElementById('copy-button');
+        const downloadButton = document.getElementById('download-button');
+        const clearButton = document.getElementById('clear-button');
+
+        // Check browser support
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        
+        if (!SpeechRecognition) {
+            document.getElementById('browser-warning').classList.remove('hidden');
+            micButton.disabled = true;
+            micButton.classList.add('opacity-50', 'cursor-not-allowed');
+            micText.textContent = 'Not Supported';
+        } else {
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.maxAlternatives = 1;
+            recognition.lang = language.value;
+
+            recognition.onstart = () => {
+                isRecording = true;
+                startTime = Date.now();
+                lastResultTime = Date.now();
+                micButton.classList.add('recording', '!bg-gray-900');
+                micIcon.className = 'ri-stop-line text-xl';
+                micText.textContent = 'Stop Recording';
+                statusIndicator.classList.remove('hidden');
+                statusIndicator.classList.add('flex');
+                pauseButton.classList.remove('hidden');
+                startTimer();
+            };
+
+            recognition.onresult = (event) => {
+                lastResultTime = Date.now();
+                let interimTranscript = '';
+                let confidenceSum = 0;
+                let confidenceCount = 0;
+
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const result = event.results[i];
+                    const transcriptText = result[0].transcript;
+                    
+                    if (result.isFinal) {
+                        finalTranscript += transcriptText + ' ';
+                        confidenceSum += result[0].confidence || 0.9;
+                        confidenceCount++;
+                    } else {
+                        interimTranscript += transcriptText;
+                    }
+                }
+
+                transcript.value = finalTranscript;
+                interimText.textContent = interimTranscript;
+                
+                if (confidenceCount > 0) {
+                    const avgConfidence = Math.round((confidenceSum / confidenceCount) * 100);
+                    accuracy.textContent = avgConfidence + '%';
+                }
+                
+                updateStats();
+                transcript.scrollTop = transcript.scrollHeight;
+            };
+
+            recognition.onend = () => {
+                if (isRecording) {
+                    // Auto-restart if still recording (for continuous mode)
+                    try {
+                        recognition.start();
+                    } catch (e) {
+                        stopRecording();
+                    }
+                }
+            };
+
+            recognition.onerror = (event) => {
+                console.error('Speech recognition error:', event.error);
+                if (event.error === 'not-allowed') {
+                    alert('Microphone access denied. Please allow microphone permission and try again.');
+                } else if (event.error === 'no-speech') {
+                    // Ignore no-speech errors, they're common
+                    return;
+                }
+                stopRecording();
+            };
+
+            // Auto-stop after 10 seconds of silence
+            setInterval(() => {
+                if (isRecording && lastResultTime && (Date.now() - lastResultTime > 10000)) {
+                    // Optional: auto-pause on silence
+                    // stopRecording();
+                }
+            }, 1000);
+        }
+
+        // Event Listeners
+        micButton.addEventListener('click', () => {
+            if (!recognition) return;
+            
+            if (isRecording) {
+                stopRecording();
+            } else {
+                startRecording();
+            }
+        });
+
+        language.addEventListener('change', () => {
+            if (recognition) {
+                recognition.lang = language.value;
+                if (isRecording) {
+                    stopRecording();
+                    setTimeout(startRecording, 300);
+                }
+            }
+        });
+
+        pauseButton.addEventListener('click', () => {
+            if (isRecording) {
+                recognition.stop();
+                pauseButton.innerHTML = '<i class="ri-play-line text-xl"></i>';
+                isRecording = false;
+            } else {
+                recognition.start();
+                pauseButton.innerHTML = '<i class="ri-pause-line text-xl"></i>';
+                isRecording = true;
+            }
+        });
+
+        copyButton.addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText(transcript.value);
+                const originalHTML = copyButton.innerHTML;
+                copyButton.innerHTML = '<i class="ri-check-line"></i><span class="hidden sm:inline">Copied!</span>';
+                copyButton.classList.add('!bg-green-50', '!border-green-300', '!text-green-700');
+                setTimeout(() => {
+                    copyButton.innerHTML = originalHTML;
+                    copyButton.classList.remove('!bg-green-50', '!border-green-300', '!text-green-700');
+                }, 2000);
+            } catch (err) {
+                transcript.select();
+                document.execCommand('copy');
+            }
+        });
+
+        downloadButton.addEventListener('click', () => {
+            const text = transcript.value;
+            if (!text.trim()) {
+                alert('Nothing to download. Please record some speech first.');
+                return;
+            }
+            
+            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `transcription-${new Date().toISOString().slice(0,19).replace(/:/g,'-')}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            const originalHTML = downloadButton.innerHTML;
+            downloadButton.innerHTML = '<i class="ri-check-line"></i><span class="hidden sm:inline">Downloaded!</span>';
+            setTimeout(() => {
+                downloadButton.innerHTML = originalHTML;
+            }, 2000);
+        });
+
+        clearButton.addEventListener('click', () => {
+            if (transcript.value && !confirm('Clear all transcribed text?')) return;
+            
+            transcript.value = '';
+            finalTranscript = '';
+            interimText.textContent = '';
+            accuracy.textContent = '—';
+            updateStats();
+            timer.textContent = '00:00';
+        });
+
+        transcript.addEventListener('input', () => {
+            finalTranscript = transcript.value;
+            updateStats();
+        });
+
+        // Functions
+        function startRecording() {
+            if (!recognition) return;
+            
+            finalTranscript = transcript.value;
+            try {
+                recognition.start();
+            } catch (e) {
+                console.error('Failed to start:', e);
+            }
+        }
+
+        function stopRecording() {
+            isRecording = false;
+            if (recognition) {
+                recognition.stop();
+            }
+            
+            micButton.classList.remove('recording', '!bg-gray-900');
+            micIcon.className = 'ri-mic-line text-xl';
+            micText.textContent = 'Start Recording';
+            statusIndicator.classList.add('hidden');
+            statusIndicator.classList.remove('flex');
+            pauseButton.classList.add('hidden');
+            interimText.textContent = '';
+            stopTimer();
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                if (!startTime) return;
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const mins = Math.floor(elapsed / 60).toString().padStart(2, '0');
+                const secs = (elapsed % 60).toString().padStart(2, '0');
+                timer.textContent = `${mins}:${secs}`;
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+
+        function updateStats() {
+            const text = transcript.value;
+            const words = text.trim() ? text.trim().split(/\s+/).filter(w => w.length > 0).length : 0;
+            const chars = text.length;
+            const lines = text ? text.split('
+').length : 0;
+            
+            wordCount.textContent = words.toLocaleString();
+            charCount.textContent = chars.toLocaleString();
+            lineCount.textContent = lines;
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                micButton.click();
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                clearButton.click();
+            }
+        });
+
+        // Initialize
+        updateStats();
+    </script>
+</body>
+</html>
+
+
+
+
