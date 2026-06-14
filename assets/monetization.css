@@ -1,0 +1,184 @@
+/* WorkPilot — affiliate blocks + email capture */
+.wp-affiliate-block {
+  margin: 1.25rem 0 0;
+  padding: 1.1rem 1.15rem;
+  border: 1px solid var(--wp-line, #e5e7eb);
+  border-radius: 12px;
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  color: var(--wp-ink, #111827);
+}
+
+html[data-theme="dark"] .wp-affiliate-block {
+  background: linear-gradient(135deg, #422006 0%, #78350f 100%);
+  border-color: #92400e;
+  color: #fef3c7;
+}
+
+.wp-affiliate-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #f59e0b;
+  color: #1f2937;
+  margin-bottom: 8px;
+}
+
+.wp-affiliate-block h3 {
+  margin: 0 0 6px;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.wp-affiliate-block p {
+  margin: 0 0 12px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--wp-muted, #5b6472);
+}
+
+html[data-theme="dark"] .wp-affiliate-block p {
+  color: #fde68a;
+}
+
+.wp-affiliate-block a.wp-affiliate-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #b45309;
+  text-decoration: none;
+}
+
+html[data-theme="dark"] .wp-affiliate-block a.wp-affiliate-cta {
+  color: #fcd34d;
+}
+
+.wp-affiliate-block a.wp-affiliate-cta:hover {
+  text-decoration: underline;
+}
+
+.wp-email-capture {
+  border-top: 1px solid var(--wp-line, #e5e7eb);
+  background: var(--wp-panel, #fff);
+  padding: 28px 16px;
+}
+
+html[data-theme="dark"] .wp-email-capture {
+  background: var(--wp-panel, #1e293b);
+  border-color: var(--wp-line, #374151);
+}
+
+.wp-email-inner {
+  width: min(640px, 100%);
+  margin: 0 auto;
+  text-align: center;
+}
+
+.wp-email-capture h3 {
+  margin: 0 0 6px;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--wp-ink, #111827);
+}
+
+.wp-email-capture p {
+  margin: 0 0 14px;
+  font-size: 0.9rem;
+  color: var(--wp-muted, #5b6472);
+}
+
+html[data-theme="dark"] .wp-email-capture h3 {
+  color: var(--wp-ink, #f3f4f6);
+}
+
+html[data-theme="dark"] .wp-email-capture p {
+  color: var(--wp-muted, #9ca3af);
+}
+
+.wp-email-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  align-items: stretch;
+}
+
+.wp-email-form input[type="email"] {
+  flex: 1 1 220px;
+  min-width: 0;
+  max-width: 320px;
+  padding: 10px 12px;
+  border: 1px solid var(--wp-line, #e5e7eb);
+  border-radius: 8px;
+  font-size: 14px;
+  background: var(--wp-soft, #f7f8fb);
+  color: var(--wp-ink, #111827);
+}
+
+.wp-email-form button {
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 8px;
+  background: #4f46e5;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.wp-email-form button:hover {
+  background: #4338ca;
+}
+
+.wp-email-form button:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.wp-email-msg {
+  margin-top: 10px;
+  font-size: 13px;
+  min-height: 1.2em;
+}
+
+.wp-email-msg.ok {
+  color: #059669;
+}
+
+.wp-email-msg.err {
+  color: #dc2626;
+}
+
+.wp-email-capture--compact {
+  padding: 16px;
+  border: 1px solid var(--wp-line, #e5e7eb);
+  border-radius: 12px;
+  margin-top: 12px;
+  background: var(--wp-soft, #f7f8fb);
+}
+
+.wp-email-capture--compact .wp-email-inner {
+  text-align: left;
+}
+
+.wp-email-capture--compact h3 {
+  font-size: 0.95rem;
+}
+
+.wp-email-capture--compact p {
+  font-size: 0.8rem;
+  margin-bottom: 10px;
+}
+
+.wp-email-capture--compact .wp-email-form {
+  justify-content: flex-start;
+}
+
+.wp-email-capture--compact .wp-email-form input[type="email"] {
+  max-width: none;
+}
