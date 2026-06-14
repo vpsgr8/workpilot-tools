@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>WorkPilot Tools</title>
+<script>
+(function () {
+  var path = location.pathname;
+  if (path.indexOf("/app/") === 0 && path !== "/app/index.html") {
+    var route = path.slice(4) || "/";
+    location.replace("/app/index.html?__path=" + encodeURIComponent(route));
+    return;
+  }
+  location.replace("/");
+})();
+</script>
+</head>
+<body></body>
+</html>
