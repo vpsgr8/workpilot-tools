@@ -1,3 +1,33 @@
-# Static deployment notes
-# Publish this directory as the site root. The entry file is index.html.
-# Keep the tools/ directory beside index.html so links such as tools/pdf-merge.html resolve correctly.
+# GitHub Pages deployment (workpilottools.biz)
+
+## Site structure
+Publish this folder as the site root. The entry file is index.html.
+Keep tools/ beside index.html so links like tools/pdf-merge.html work.
+
+## GoDaddy DNS (required)
+In GoDaddy → My Products → workpilottools.biz → DNS:
+
+1. Remove Domain Forwarding / URL redirect (this causes redirect loops).
+2. Delete old A records pointing to GoDaddy parking IPs.
+3. Add four A records for @ (root):
+   - 185.199.108.153
+   - 185.199.109.153
+   - 185.199.110.153
+   - 185.199.111.153
+4. Optional www: CNAME www → vpsgr8.github.io
+
+## GitHub Pages
+Repo: https://github.com/vpsgr8/workpilot-tools
+Settings → Pages → Source: Deploy from branch main, folder / (root)
+Custom domain: workpilottools.biz
+Enable Enforce HTTPS after DNS shows verified.
+
+## Add or update files from your PC
+1. Copy new files into this project folder (same layout as the live site).
+2. Open terminal in this folder and run:
+   git add .
+   git commit -m "Describe your change"
+   git push origin main
+3. GitHub Pages updates in 1–3 minutes.
+
+Or ask Cursor to make changes and say "push to GitHub" — it will commit and push for you.
