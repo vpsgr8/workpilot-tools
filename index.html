@@ -15,8 +15,10 @@
 <script>try{var t=localStorage.getItem('wp-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')}catch(e){}</script>
 <link rel="stylesheet" href="assets/theme.css">
 <link rel="stylesheet" href="assets/monetization.css">
+<link rel="stylesheet" href="assets/site-brand.css">
 <script defer src="assets/theme.js"></script>
 <script defer src="assets/monetization.js"></script>
+<script defer src="assets/site-brand.js"></script>
 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -70,9 +72,14 @@
 <body>
   <header>
     <nav class="nav" aria-label="Primary navigation">
-      <a class="brand" href="index.html">WorkPilot Tools</a>
+      <a class="brand wp-brand-lockup" href="index.html">
+        <img class="wp-logo wp-logo-workpilot" src="assets/workpilot-logo.svg" alt="" width="40" height="40">
+        <span class="wp-brand-text"><strong>WorkPilot Tools</strong><small>a product of MarketMind Labs</small></span>
+        <img class="wp-logo wp-logo-mml" src="assets/marketmind-labs-logo.png" alt="MarketMind Labs" width="36" height="36">
+      </a>
       <div class="links">
         <button type="button" class="wp-theme-toggle" aria-label="Toggle dark mode" aria-pressed="false" title="Toggle dark mode">🌙</button>
+        <a href="index.html">Home</a>
         <a href="pdf-tools.html">PDF Tools</a>
         <a href="ai-tools.html">AI Tools</a>
         <a href="image-tools.html">Image Tools</a>
@@ -82,6 +89,8 @@
         <a href="pregnancy-tools.html">Pregnancy</a>
         <a href="baby-parenting-tools.html">Baby</a>
         <a href="#blogs">Blogs</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
       </div>
     </nav>
   </header>
@@ -251,7 +260,10 @@
     </section>
   </main>
   <footer>
-    <span>© 2026 WorkPilot Tools</span>
+    <span>© 2026 WorkPilot Tools · a product of MarketMind Labs</span>
+    <a href="index.html">Home</a>
+    <a href="about.html">About Us</a>
+    <a href="contact.html">Contact Us</a>
     <a href="privacy.html">Privacy</a>
     <a href="terms.html">Terms</a>
     <a href="blog/index.html">Blog</a>
