@@ -1,143 +1,257 @@
 (function () {
-  var EMAIL_ENDPOINT = "https://formsubmit.co/ajax/noreply@workpilottools.biz";
+  var EMAIL_ENDPOINT = "https://formsubmit.co/ajax/mml.products26@gmail.com";
   var EMAIL_STORAGE = "wp-email-subscribed";
+  var AMAZON_TAG = "glamstore072-21";
+  var RAZORPAY_DONATE = "https://razorpay.me/@vishalpratapsingh601";
+
+  function amz(asin) {
+    return "https://www.amazon.in/dp/" + asin + "?tag=" + AMAZON_TAG;
+  }
+
+  function amzSearch(keywords) {
+    return "https://www.amazon.in/s?k=" + encodeURIComponent(keywords) + "&tag=" + AMAZON_TAG;
+  }
+
+  function product(title, body, cta, asin) {
+    return { title: title, body: body, cta: cta, url: amz(asin) };
+  }
+
+  function searchProduct(title, body, cta, keywords) {
+    return { title: title, body: body, cta: cta, url: amzSearch(keywords) };
+  }
+
+  var P = {
+    hpPrinter: product(
+      "HP Smart Tank 589 WiFi Printer",
+      "Print, scan & copy at home — perfect after merging, converting, or compressing PDFs. Low-cost ink tank, bestseller on Amazon India.",
+      "View on Amazon",
+      "B0BN1XT6TF"
+    ),
+    laminator: product(
+      "Amazon Basics 9\" Thermal Laminator",
+      "Protect important PDF printouts, certificates, and ID copies with a compact home/office laminator.",
+      "Shop on Amazon",
+      "B07BJLMSSJ"
+    ),
+    fileOrganizer: searchProduct(
+      "Document File Organizers (Pack of 6)",
+      "Keep merged PDFs and printouts sorted — ring-binder folders rated highly by home-office buyers.",
+      "Browse on Amazon",
+      "document file folder organizer A4"
+    ),
+    wacomTablet: product(
+      "Wacom One Pen Tablet",
+      "Level up AI art and avatar tools with a pressure-sensitive pen tablet — top pick for digital creators.",
+      "View on Amazon",
+      "B07FX45BHK"
+    ),
+    xpPen: product(
+      "XP-Pen Deco 01 V2 Drawing Tablet",
+      "Create AI-style art, avatars, and headshots with a budget-friendly graphic tablet loved by beginners.",
+      "View on Amazon",
+      "B07W5JKTGJ"
+    ),
+    ringLight: product(
+      "Digitek 10\" LED Ring Light with Tripod",
+      "Better lighting for AI headshots, face-swap previews, and social content — essential creator gear.",
+      "View on Amazon",
+      "B07WCL9L8K"
+    ),
+    sandiskSd: product(
+      "SanDisk Ultra 128GB SD Card",
+      "Store compressed images, RAW exports, and photo batches — fast UHS-I card with thousands of 5★ reviews.",
+      "View on Amazon",
+      "B07DNH56PM"
+    ),
+    photoPaper: searchProduct(
+      "HP Glossy Photo Paper (100 Sheets)",
+      "Print collage and resized images at photo quality — pairs well with our image tools.",
+      "Shop on Amazon",
+      "HP photo paper glossy A4 100 sheets"
+    ),
+    boatHeadphones: product(
+      "boAt Rockerz 450 Bluetooth Headphones",
+      "#1 bestselling on-ear headphones on Amazon India — great for editing audio and voice recordings.",
+      "View on Amazon",
+      "B07PR1CL3S"
+    ),
+    zebronicsMic: product(
+      "Zebronics Zeb-Ultima Pro USB Microphone",
+      "Crystal-clear voice recording and podcasting — upgrade from your laptop mic for speech-to-text workflows.",
+      "View on Amazon",
+      "B07WJ5D3HW"
+    ),
+    jblSpeaker: product(
+      "JBL Go 3 Portable Bluetooth Speaker",
+      "Preview text-to-speech output and audio merges on a compact speaker with deep bass.",
+      "View on Amazon",
+      "B09G6QG4SL"
+    ),
+    logitechWebcam: product(
+      "Logitech C270 HD Webcam",
+      "Record screen tutorials and video calls in sharper HD — pairs with our screen & video tools.",
+      "View on Amazon",
+      "B008QS9W06"
+    ),
+    tripod: searchProduct(
+      "Digitek Portable Camera Tripod",
+      "Stable shots for screen recordings, video trims, and creator setups — lightweight bestseller on Amazon.",
+      "Browse on Amazon",
+      "camera tripod stand mobile holder"
+    ),
+    fireTvStick: product(
+      "Amazon Fire TV Stick 4K Max",
+      "Stream and preview compressed videos on your TV — popular living-room upgrade in India.",
+      "View on Amazon",
+      "B0CJKM68RC"
+    ),
+    casioCalc: product(
+      "Casio FX-991EX Scientific Calculator",
+      "India's most trusted calculator for EMI, SIP, GST, and loan math — exam-approved and bestseller.",
+      "View on Amazon",
+      "B011UK5DGY"
+    ),
+    financeBook: product(
+      "Rich Dad Poor Dad (Paperback)",
+      "Classic personal-finance read after running SIP, EMI, or loan numbers — millions sold worldwide.",
+      "View on Amazon",
+      "B016ZY3KNO"
+    ),
+    resumeFolder: searchProduct(
+      "Leatherette Document & Resume Folder",
+      "Carry printed resumes and business cards professionally to interviews and client meetings.",
+      "Browse on Amazon",
+      "resume document folder interview"
+    ),
+    labelPrinter: searchProduct(
+      "Brother QL-800 Label Printer",
+      "Print barcode & QR labels for inventory, shipping, and retail — pro upgrade from on-screen codes.",
+      "Shop on Amazon",
+      "Brother label printer QR barcode"
+    ),
+    portableScanner: product(
+      "iBall Portable Document Scanner",
+      "Scan receipts and papers to PDF on the go — ideal companion to our document scanner tool.",
+      "View on Amazon",
+      "B07Y2VFMF3"
+    ),
+    pregnancyBook: product(
+      "What to Expect When You're Expecting",
+      "World's bestselling pregnancy guide — read alongside due-date, week-by-week, and BMI tools.",
+      "View on Amazon",
+      "B004FV4AR6"
+    ),
+    maternityPillow: searchProduct(
+      "Mom's Moon Maternity Pillow (C-Shape)",
+      "Top-rated full-body pregnancy pillow for better sleep during second and third trimesters.",
+      "View on Amazon",
+      "maternity pillow C shape pregnancy"
+    ),
+    ovulationKit: searchProduct(
+      "i-Know Ovulation Test Kit (5 Tests)",
+      "Track fertile days accurately — use with our ovulation and fertility calculators.",
+      "Shop on Amazon",
+      "ovulation test kit India"
+    ),
+    babyDiapers: product(
+      "Pampers Active Baby Taped Diapers (New Born)",
+      "India's trusted diaper brand for newborns — essential after using feeding and growth calculators.",
+      "View on Amazon",
+      "B07BHCB9RR"
+    ),
+    babyMonitor: searchProduct(
+      "Realme Wi-Fi Baby Monitor Camera",
+      "Watch your baby remotely with night vision — peace of mind for new parents.",
+      "Browse on Amazon",
+      "baby monitor camera wifi night vision"
+    ),
+    babyThermometer: searchProduct(
+      "Dr. Trust Infrared Forehead Thermometer",
+      "Quick fever checks for infants — recommended alongside vaccination and health tracking.",
+      "View on Amazon",
+      "baby infrared thermometer forehead"
+    ),
+  };
 
   var CATEGORY_AFFILIATES = {
-    pdf: {
-      title: "Adobe Acrobat Pro",
-      body: "Need advanced PDF editing, OCR, and batch workflows? Acrobat Pro is the industry standard for professionals.",
-      cta: "Explore Adobe Acrobat Pro",
-      url: "https://www.adobe.com/acrobat/online.html",
-    },
-    ai: {
-      title: "Canva Pro",
-      body: "Create stunning AI-assisted designs, social posts, and presentations with premium templates and tools.",
-      cta: "Try Canva Pro free",
-      url: "https://www.canva.com/pro/",
-    },
-    image: {
-      title: "Adobe Photoshop",
-      body: "Go beyond quick edits — Photoshop offers professional retouching, layers, and creative control.",
-      cta: "See Adobe Photoshop plans",
-      url: "https://www.adobe.com/products/photoshop.html",
-    },
-    audio: {
-      title: "Descript",
-      body: "Edit audio and podcasts like a doc — transcription, filler-word removal, and studio sound in one app.",
-      cta: "Try Descript free",
-      url: "https://www.descript.com/",
-    },
-    video: {
-      title: "CapCut Pro",
-      body: "Upgrade your video edits with premium effects, auto captions, and faster exports for creators.",
-      cta: "Get CapCut Pro",
-      url: "https://www.capcut.com/",
-    },
-    business: {
-      title: "FreshBooks",
-      body: "Send professional invoices, track expenses, and manage clients — ideal for freelancers and small businesses.",
-      cta: "Start FreshBooks free trial",
-      url: "https://www.freshbooks.com/",
-    },
-    pregnancy: {
-      title: "What to Expect App",
-      body: "Track your pregnancy week-by-week with expert tips, checklists, and community support.",
-      cta: "Download What to Expect",
-      url: "https://www.whattoexpect.com/",
-    },
-    baby: {
-      title: "BabyCenter App",
-      body: "Monitor milestones, feeding, sleep, and growth with trusted parenting guidance.",
-      cta: "Try BabyCenter",
-      url: "https://www.babycenter.com/",
-    },
+    pdf: P.hpPrinter,
+    ai: P.wacomTablet,
+    image: P.sandiskSd,
+    audio: P.boatHeadphones,
+    video: P.logitechWebcam,
+    business: P.casioCalc,
+    pregnancy: P.pregnancyBook,
+    baby: P.babyDiapers,
   };
 
   var TOOL_AFFILIATES = {
-    "sip-calculator": {
-      title: "Groww — Start SIP Investing",
-      body: "Ready to invest? Open a free demat account and start SIPs in mutual funds with zero commission on direct plans.",
-      cta: "Start SIP on Groww",
-      url: "https://groww.in/mutual-funds",
-    },
-    "emi-calculator": {
-      title: "HDFC Bank Home Loans",
-      body: "Compare home loan rates and check eligibility after running your EMI numbers.",
-      cta: "Check HDFC home loan rates",
-      url: "https://www.hdfcbank.com/personal/borrow/your-home-loans",
-    },
-    "loan-calculator": {
-      title: "BankBazaar Loan Offers",
-      body: "Find personal and home loan offers matched to your profile and compare interest rates side by side.",
-      cta: "Compare loan offers",
-      url: "https://www.bankbazaar.com/personal-loan.html",
-    },
-    "resume-builder": {
-      title: "LinkedIn Premium",
-      body: "Boost your job search with InMail, applicant insights, and profile views with LinkedIn Premium.",
-      cta: "Try LinkedIn Premium",
-      url: "https://premium.linkedin.com/",
-    },
-    "invoice-generator": {
-      title: "Zoho Invoice",
-      body: "Automate invoicing, payment reminders, and GST billing for growing businesses.",
-      cta: "Use Zoho Invoice free",
-      url: "https://www.zoho.com/invoice/",
-    },
-    "gst-calculator": {
-      title: "ClearTax GST Software",
-      body: "File GST returns and manage compliance easily after calculating tax on your invoices.",
-      cta: "Explore ClearTax GST",
-      url: "https://cleartax.in/gst",
-    },
-    "ai-image-generator": {
-      title: "Midjourney",
-      body: "Generate high-quality AI art and illustrations for creative projects and marketing.",
-      cta: "Join Midjourney",
-      url: "https://www.midjourney.com/",
-    },
-    "background-remover": {
-      title: "Remove.bg Pro",
-      body: "Batch-remove backgrounds at scale with HD cutouts for e-commerce and design work.",
-      cta: "Upgrade to Remove.bg Pro",
-      url: "https://www.remove.bg/pricing",
-    },
-    "pdf-to-word": {
-      title: "Smallpdf Pro",
-      body: "Convert, edit, and sign PDFs without limits — great for document-heavy workflows.",
-      cta: "Try Smallpdf Pro",
-      url: "https://smallpdf.com/pricing",
-    },
-    "pdf-merge": {
-      title: "PDF Expert",
-      body: "Merge, annotate, and edit PDFs on Mac and iOS with a polished native experience.",
-      cta: "Get PDF Expert",
-      url: "https://pdfexpert.com/",
-    },
-    "screen-recorder": {
-      title: "Loom Business",
-      body: "Record and share quick video messages for teams, tutorials, and async communication.",
-      cta: "Try Loom free",
-      url: "https://www.loom.com/",
-    },
-    "text-to-speech": {
-      title: "ElevenLabs",
-      body: "Create natural AI voiceovers and narration for videos, podcasts, and accessibility.",
-      cta: "Try ElevenLabs",
-      url: "https://elevenlabs.io/",
-    },
-    "vaccination-tracker": {
-      title: "BabyCenter Vaccine Guide",
-      body: "Cross-check IAP schedules with pediatrician-approved vaccine information and reminders.",
-      cta: "View vaccine guide",
-      url: "https://www.babycenter.com/health/doctor-visits-and-vaccines",
-    },
-    "pregnancy-due-date": {
-      title: "Pregnancy+ App",
-      body: "Track due date, baby size, and daily tips with one of the most popular pregnancy apps.",
-      cta: "Download Pregnancy+",
-      url: "https://pregnancyplusapp.com/",
-    },
+    "pdf-compress": P.hpPrinter,
+    "pdf-merge": P.fileOrganizer,
+    "pdf-protect": P.laminator,
+    "pdf-rotate": P.hpPrinter,
+    "pdf-split": P.fileOrganizer,
+    "pdf-to-jpg": P.hpPrinter,
+    "pdf-to-word": P.hpPrinter,
+    "jpg-to-pdf": P.photoPaper,
+    "word-to-pdf": P.hpPrinter,
+    "excel-to-pdf": P.hpPrinter,
+    "ai-image-generator": P.wacomTablet,
+    "ai-avatar": P.xpPen,
+    "ai-upscaler": P.sandiskSd,
+    "background-remover": P.ringLight,
+    "face-swap": P.ringLight,
+    "image-enhancer": P.sandiskSd,
+    "object-remover": P.xpPen,
+    "ai-headshots": P.ringLight,
+    "instagram-captions": P.ringLight,
+    "youtube-titles": P.fireTvStick,
+    "hashtag-generator": P.ringLight,
+    "image-compressor": P.sandiskSd,
+    "image-converter": P.sandiskSd,
+    "image-cropper": P.photoPaper,
+    "image-resizer": P.photoPaper,
+    "image-rotator": P.sandiskSd,
+    "collage-maker": P.photoPaper,
+    "gif-maker": P.sandiskSd,
+    "meme-generator": P.ringLight,
+    "watermark-adder": P.photoPaper,
+    "audio-converter": P.boatHeadphones,
+    "audio-merger": P.boatHeadphones,
+    "audio-trimmer": P.boatHeadphones,
+    "voice-recorder": P.zebronicsMic,
+    "speech-to-text": P.zebronicsMic,
+    "text-to-speech": P.jblSpeaker,
+    "video-compressor": P.fireTvStick,
+    "video-converter": P.fireTvStick,
+    "video-trimmer": P.tripod,
+    "screen-recorder": P.logitechWebcam,
+    "barcode-generator": P.labelPrinter,
+    "business-card": P.resumeFolder,
+    "document-scanner": P.portableScanner,
+    "invoice-generator": P.financeBook,
+    "qr-generator": P.labelPrinter,
+    "age-calculator": P.casioCalc,
+    "emi-calculator": P.financeBook,
+    "sip-calculator": P.financeBook,
+    "gst-calculator": P.casioCalc,
+    "loan-calculator": P.financeBook,
+    "qr-code-studio": P.labelPrinter,
+    "resume-builder": P.resumeFolder,
+    "pregnancy-due-date": P.pregnancyBook,
+    "pregnancy-week": P.pregnancyBook,
+    "ovulation-calculator": P.ovulationKit,
+    "fertility-calculator": P.ovulationKit,
+    "pregnancy-weight-gain": P.maternityPillow,
+    "pregnancy-bmi": P.maternityPillow,
+    "baby-gender-predictor": P.pregnancyBook,
+    "baby-name-generator": P.pregnancyBook,
+    "conception-date": P.ovulationKit,
+    "pregnancy-countdown": P.maternityPillow,
+    "baby-growth-percentile": P.babyThermometer,
+    "baby-feeding-calculator": P.babyDiapers,
+    "baby-sleep-calculator": P.babyMonitor,
+    "vaccination-tracker": P.babyThermometer,
+    "baby-age-calculator": P.babyDiapers,
   };
 
   var TOOL_CATEGORIES = {
@@ -166,6 +280,17 @@
     "vaccination-tracker": "baby", "baby-age-calculator": "baby",
   };
 
+  var CATEGORY_PAGES = {
+    "pdf-tools.html": "pdf",
+    "ai-tools.html": "ai",
+    "image-tools.html": "image",
+    "audio-tools.html": "audio",
+    "video-tools.html": "video",
+    "business-tools.html": "business",
+    "pregnancy-tools.html": "pregnancy",
+    "baby-parenting-tools.html": "baby",
+  };
+
   function esc(s) {
     var d = document.createElement("div");
     d.textContent = s;
@@ -173,19 +298,40 @@
   }
 
   function getAffiliate(slug) {
-    if (TOOL_AFFILIATES[slug]) return TOOL_AFFILIATES[slug];
-    var cat = TOOL_CATEGORIES[slug] || "business";
+    if (slug && TOOL_AFFILIATES[slug]) return TOOL_AFFILIATES[slug];
+    var cat = (slug && TOOL_CATEGORIES[slug]) || slug || "business";
     return CATEGORY_AFFILIATES[cat] || CATEGORY_AFFILIATES.business;
+  }
+
+  function categoryFromPath() {
+    var path = location.pathname.replace(/\\/g, "/");
+    for (var file in CATEGORY_PAGES) {
+      if (path.indexOf(file) !== -1) return CATEGORY_PAGES[file];
+    }
+    return null;
   }
 
   function affiliateHtml(data) {
     return (
-      '<section class="wp-affiliate-block" aria-label="Recommended partner">' +
-      '<span class="wp-affiliate-badge">Affiliate</span>' +
+      '<section class="wp-affiliate-block" aria-label="Recommended product">' +
+      '<span class="wp-affiliate-badge">Amazon Affiliate</span>' +
       "<h3>" + esc(data.title) + "</h3>" +
       "<p>" + esc(data.body) + "</p>" +
       '<a class="wp-affiliate-cta" href="' + esc(data.url) + '" rel="nofollow sponsored noopener" target="_blank">' +
       esc(data.cta) + " →</a>" +
+      "</section>"
+    );
+  }
+
+  function donateHtml(compact) {
+    var cls = compact ? " wp-donate-block--compact" : "";
+    return (
+      '<section class="wp-donate-block' + cls + '" aria-label="Support WorkPilot Tools">' +
+      "<h3>Support WorkPilot Tools</h3>" +
+      "<p>Enjoy our free tools? A small donation helps us keep building more utilities for everyone.</p>" +
+      '<a class="wp-donate-cta" href="' +
+      RAZORPAY_DONATE +
+      '" rel="noopener" target="_blank">❤ Donate via Razorpay</a>' +
       "</section>"
     );
   }
@@ -214,10 +360,13 @@
   }
 
   function insertAffiliateBlock() {
-    var slug = toolSlugFromPath();
-    if (!slug || document.querySelector(".wp-affiliate-block")) return;
+    if (document.querySelector(".wp-affiliate-block")) return;
 
-    var data = getAffiliate(slug);
+    var slug = toolSlugFromPath();
+    var cat = categoryFromPath();
+    if (!slug && !cat) return;
+
+    var data = slug ? getAffiliate(slug) : getAffiliate(cat);
     var html = affiliateHtml(data);
     var toolRoot = document.getElementById("workpilot-tool");
     var card = toolRoot
@@ -229,12 +378,47 @@
       return;
     }
 
+    var grid = document.querySelector("main .grid");
+    if (grid) {
+      grid.insertAdjacentHTML("afterend", html);
+      return;
+    }
+
     var main = document.querySelector("main");
-    if (main) main.insertAdjacentHTML("afterbegin", html);
+    if (main) main.insertAdjacentHTML("beforeend", html);
+  }
+
+  function insertDonateBlock() {
+    if (document.querySelector(".wp-donate-block")) return;
+
+    var footer = document.querySelector("footer");
+    if (footer) {
+      footer.insertAdjacentHTML("beforebegin", donateHtml(false));
+    } else {
+      document.body.insertAdjacentHTML("beforeend", donateHtml(false));
+    }
+  }
+
+  function injectFloatingDonate() {
+    if (document.querySelector(".wp-donate-btn")) return;
+    var a = document.createElement("a");
+    a.className = "wp-donate-btn";
+    a.href = RAZORPAY_DONATE;
+    a.target = "_blank";
+    a.rel = "noopener";
+    a.setAttribute("aria-label", "Donate via Razorpay");
+    a.innerHTML = "&#10084; Donate";
+    document.body.appendChild(a);
   }
 
   function insertEmailCapture() {
     if (document.querySelector(".wp-email-capture:not(.wp-email-capture--compact)")) return;
+
+    var donate = document.querySelector(".wp-donate-block");
+    if (donate) {
+      donate.insertAdjacentHTML("afterend", emailCaptureHtml(false));
+      return;
+    }
 
     var footer = document.querySelector("footer");
     if (footer) {
@@ -253,6 +437,9 @@
     if (!asideInner || asideInner.querySelector(".wp-email-capture--compact")) return;
 
     asideInner.insertAdjacentHTML("beforeend", emailCaptureHtml(true));
+    if (!asideInner.querySelector(".wp-donate-block--compact")) {
+      asideInner.insertAdjacentHTML("beforeend", donateHtml(true));
+    }
   }
 
   function bindEmailForms() {
@@ -327,6 +514,8 @@
 
   function init() {
     insertAffiliateBlock();
+    insertDonateBlock();
+    injectFloatingDonate();
     insertEmailCapture();
     insertSidebarEmail();
     bindEmailForms();

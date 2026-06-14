@@ -25,15 +25,40 @@
 
   function brandHtml(prefix) {
     return (
-      '<img class="wp-logo wp-logo-workpilot" src="' +
-      prefix +
-      'workpilot-logo.svg" alt="" width="40" height="40">' +
-      '<span class="wp-brand-text"><strong>WorkPilot Tools</strong>' +
-      "<small>a product of MarketMind Labs</small></span>" +
       '<img class="wp-logo wp-logo-mml" src="' +
       prefix +
-      'marketmind-labs-logo.png" alt="MarketMind Labs" width="36" height="36">'
+      'marketmind-labs-logo.png" alt="MarketMind Labs" width="40" height="40">' +
+      '<span class="wp-brand-text"><strong>WorkPilot Tools</strong>' +
+      "<small>a product of MarketMind Labs</small></span>"
     );
+  }
+
+  function stripTopNavLinks() {
+    var header = document.querySelector("header");
+    if (!header) return;
+
+    header.querySelectorAll("a").forEach(function (a) {
+      if (a.classList.contains("wp-brand-lockup") || a.closest(".wp-brand-lockup")) return;
+
+      var href = (a.getAttribute("href") || "").toLowerCase();
+      var text = (a.textContent || "").trim().toLowerCase();
+
+      var isHome =
+        text === "home" ||
+        href === "index.html" ||
+        href === "../index.html" ||
+        href === "/index.html";
+      var isBlog =
+        text === "blogs" ||
+        text === "blog" ||
+        href === "#blogs" ||
+        href.indexOf("blog/") !== -1 ||
+        href.indexOf("blog/index") !== -1;
+      var isAbout = text === "about" || text === "about us" || href.indexOf("about.html") !== -1;
+      var isContact = text === "contact" || text === "contact us" || href.indexOf("contact.html") !== -1;
+
+      if (isHome || isBlog || isAbout || isContact) a.remove();
+    });
   }
 
   function injectHomeButton() {
@@ -51,6 +76,11 @@
     var home = homeHref();
     var header = document.querySelector("header");
     if (!header) return;
+
+    header.querySelectorAll(".wp-brand-lockup").forEach(function (link) {
+      link.href = home;
+      link.innerHTML = brandHtml(prefix);
+    });
 
     var candidates = header.querySelectorAll(
       'a.brand, a[href="index.html"], a[href="../index.html"], a[href="/index.html"]'
@@ -79,6 +109,15 @@
       if (footer.dataset.wpBrandPatched) return;
       var text = footer.textContent || "";
       if (text.indexOf("About") !== -1 && text.indexOf("Contact") !== -1) {
+        if (text.indexOf("Donate") === -1) {
+          var donateLink = document.createElement("a");
+          donateLink.href = "https://razorpay.me/@vishalpratapsingh601";
+          donateLink.target = "_blank";
+          donateLink.rel = "noopener";
+          donateLink.textContent = "Donate";
+          footer.appendChild(document.createTextNode(" "));
+          footer.appendChild(donateLink);
+        }
         footer.dataset.wpBrandPatched = "1";
         return;
       }
@@ -101,6 +140,15 @@
       footer.appendChild(about);
       footer.appendChild(document.createTextNode(" "));
       footer.appendChild(contact);
+
+      var donate = document.createElement("a");
+      donate.href = "https://razorpay.me/@vishalpratapsingh601";
+      donate.target = "_blank";
+      donate.rel = "noopener";
+      donate.textContent = "Donate";
+
+      footer.appendChild(document.createTextNode(" "));
+      footer.appendChild(donate);
 
       if (footer.querySelector("span") || footer.textContent.indexOf("MarketMind") === -1) {
         var note = document.createElement("span");
@@ -129,12 +177,8 @@
       '<span class="wp-app-brand">' +
       '<img src="' +
       prefix +
-      'workpilot-logo.svg" alt="">' +
-      "<span>WorkPilot Tools · MarketMind Labs</span></span>" +
-      '<span style="display:flex;gap:12px;flex-wrap:wrap">' +
-      '<a href="/about.html">About</a>' +
-      '<a href="/contact.html">Contact</a>' +
-      "</span>";
+      'marketmind-labs-logo.png" alt="MarketMind Labs">' +
+      "<span>WorkPilot Tools · MarketMind Labs</span></span>";
 
     var root = document.getElementById("root");
     if (root) document.body.insertBefore(bar, root);
@@ -144,6 +188,7 @@
   function init() {
     injectAppTopbar();
     patchHeaderBrand();
+    stripTopNavLinks();
     injectHomeButton();
     patchFooterLinks();
   }

@@ -32,16 +32,9 @@
   max-width: min(100%, 520px);
 }
 
-.wp-brand-lockup .wp-logo-workpilot {
+.wp-brand-lockup .wp-logo-mml {
   width: 40px;
   height: 40px;
-  flex-shrink: 0;
-  border-radius: 10px;
-}
-
-.wp-brand-lockup .wp-logo-mml {
-  width: 36px;
-  height: 36px;
   flex-shrink: 0;
   border-radius: 50%;
   object-fit: cover;
@@ -162,10 +155,6 @@ html[data-theme="dark"] .wp-page-shell {
 }
 
 @media (max-width: 640px) {
-  .wp-brand-lockup .wp-logo-mml {
-    display: none;
-  }
-
   .wp-brand-text small {
     font-size: 0.62rem;
   }
