@@ -52,6 +52,11 @@
     .tool-card small, .blog-card small { color: var(--muted); line-height: 1.45; }
     .blog-card { min-height: 140px; }
     .view-all { color: var(--brand); font-weight: 700; text-decoration: none; font-size: 14px; }
+    .bb-home-premium { margin: 0 0 28px; padding: 28px; border-radius: 14px; background: linear-gradient(135deg, #0f172a 0%, #312e81 100%); color: #fff; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px; }
+    .bb-home-premium h2 { margin: 0 0 8px; font-size: 1.5rem; color: #fff; }
+    .bb-home-premium p { margin: 0; opacity: 0.9; max-width: 520px; line-height: 1.55; }
+    .bb-home-premium a { padding: 12px 22px; background: #fff; color: #4f46e5; border-radius: 10px; font-weight: 700; text-decoration: none; white-space: nowrap; }
+    .bb-home-premium a.secondary { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.35); margin-left: 8px; }
     footer { border-top: 1px solid var(--line); color: var(--muted); padding: 24px 0 36px; font-size: 14px; display: flex; gap: 14px; flex-wrap: wrap; }
     footer a { color: inherit; }
     @media (max-width: 640px) { .nav { align-items: flex-start; flex-direction: column; padding: 14px 0; } .links { justify-content: flex-start; } }
@@ -93,6 +98,17 @@
     <section class="hero">
       <h1>Free online tools, neatly grouped for faster work.</h1>
       <p>Convert, compress, create, record, and edit files directly in the browser. Browse by PDF, AI, image, audio, video, business, pregnancy, baby and parenting tools, or read practical guides in the blog.</p>
+    </section>
+
+    <section class="bb-home-premium" aria-labelledby="premium-title">
+      <div>
+        <h2 id="premium-title">BizBuilt AI — Premium for SMEs</h2>
+        <p>All-in-one CRM, HR, payroll, invoices, expenses, revenue tracking & growth analytics. Built by MarketMind Labs for Indian businesses.</p>
+      </div>
+      <div>
+        <a href="bizbuilt-ai.html">Explore Premium</a>
+        <a class="secondary" href="bizbuilt/index.html">Launch demo</a>
+      </div>
     </section>
 
     <section id="tools" aria-labelledby="tools-title">
@@ -259,6 +275,7 @@
     <a href="index.html">Home</a>
     <a href="about.html">About Us</a>
     <a href="contact.html">Contact Us</a>
+    <a href="bizbuilt-ai.html">BizBuilt AI Premium</a>
     <a href="https://razorpay.me/@vishalpratapsingh601" target="_blank" rel="noopener">Donate</a>
     <a href="privacy.html">Privacy</a>
     <a href="terms.html">Terms</a>

@@ -118,6 +118,13 @@
           footer.appendChild(document.createTextNode(" "));
           footer.appendChild(donateLink);
         }
+        if (text.indexOf("BizBuilt") === -1) {
+          var premium = document.createElement("a");
+          premium.href = depthPrefix() + "bizbuilt-ai.html";
+          premium.textContent = "BizBuilt AI Premium";
+          footer.appendChild(document.createTextNode(" "));
+          footer.appendChild(premium);
+        }
         footer.dataset.wpBrandPatched = "1";
         return;
       }
@@ -149,6 +156,13 @@
 
       footer.appendChild(document.createTextNode(" "));
       footer.appendChild(donate);
+
+      var premium = document.createElement("a");
+      premium.href = depthPrefix() + "bizbuilt-ai.html";
+      premium.textContent = "BizBuilt AI Premium";
+
+      footer.appendChild(document.createTextNode(" "));
+      footer.appendChild(premium);
 
       if (footer.querySelector("span") || footer.textContent.indexOf("MarketMind") === -1) {
         var note = document.createElement("span");

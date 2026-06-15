@@ -95,6 +95,7 @@ const CATEGORIES = {
       { slug: "document-scanner", name: "Document Scanner", desc: "Open tool", type: "html" },
       { slug: "invoice-generator", name: "Invoice Generator", desc: "Open tool", type: "html" },
       { slug: "qr-generator", name: "Qr Generator", desc: "Open tool", type: "html" },
+      { slug: "web-scraper", name: "Web Scraper", desc: "Extract links, tables, and data from HTML", type: "html" },
       { slug: "age-calculator", name: "Age Calculator", desc: "Exact age and birthday countdown", type: "app", route: "/age" },
       { slug: "emi-calculator", name: "EMI Calculator", desc: "Loan EMI and interest breakdown", type: "app", route: "/emi" },
       { slug: "sip-calculator", name: "SIP Calculator", desc: "Mutual fund SIP returns", type: "app", route: "/sip" },
