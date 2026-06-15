@@ -1,6 +1,19 @@
 (function () {
-  var STORAGE_KEY = "bizbuilt-data-v2";
-  var state = { view: "dashboard", tab: "", data: null, docQuery: "" };
+  var STORAGE_KEY = "bizbuilt-data-v3";
+  var state = { view: "dashboard", tabs: {}, data: null, docQuery: "" };
+
+  function getTab(view, fallback) {
+    if (!state.tabs[view]) state.tabs[view] = fallback;
+    return state.tabs[view];
+  }
+
+  function refreshView() {
+    var el = document.getElementById("bb-view-content");
+    if (!el) return;
+    var fn = RENDERERS[state.view] || renderDashboard;
+    el.innerHTML = fn();
+    bindForms();
+  }
 
   var PIPELINE = [
     "New Lead", "Contacted", "Qualified", "Proposal Sent", "Negotiation", "Won", "Lost",
@@ -89,6 +102,48 @@
         { id: 1, month: "2026-05", total: 175000, status: "paid", employees: 3 },
         { id: 2, month: "2026-06", total: 175000, status: "pending", employees: 3 },
       ],
+      payrollStructures: [
+        {
+          id: 1,
+          name: "Standard SME — India",
+          description: "Basic 50% + HRA 20% + allowances with PF, ESI & Professional Tax",
+          basicPercent: 50,
+          hraPercent: 20,
+          transportAllowance: 1600,
+          medicalAllowance: 1250,
+          specialAllowancePercent: 10,
+          pfPercent: 12,
+          esiPercent: 0.75,
+          professionalTax: 200,
+          tdsPercent: 5,
+          savedAt: "2026-01-15",
+        },
+        {
+          id: 2,
+          name: "Senior Management",
+          description: "Higher basic ratio with bonus component for leadership roles",
+          basicPercent: 60,
+          hraPercent: 25,
+          transportAllowance: 3000,
+          medicalAllowance: 2500,
+          specialAllowancePercent: 15,
+          pfPercent: 12,
+          esiPercent: 0,
+          professionalTax: 200,
+          tdsPercent: 10,
+          savedAt: "2026-02-01",
+        },
+      ],
+      employeePayroll: [
+        { empId: 1, structureId: 1, ctc: 660000, bankAccount: "HDFC ****4521", pan: "ABCDE1234F", uan: "100012345678" },
+        { empId: 2, structureId: 2, ctc: 864000, bankAccount: "ICICI ****8890", pan: "FGHIJ5678K", uan: "100098765432" },
+        { empId: 3, structureId: 1, ctc: 576000, bankAccount: "HDFC ****3312", pan: "KLMNO9012P", uan: "100055667788" },
+      ],
+      payslips: [
+        { id: 1, empId: 1, month: "2026-05", gross: 55000, deductions: 6800, net: 48200, generatedAt: "2026-05-31" },
+        { id: 2, empId: 2, month: "2026-05", gross: 72000, deductions: 12400, net: 59600, generatedAt: "2026-05-31" },
+        { id: 3, empId: 3, month: "2026-05", gross: 48000, deductions: 5900, net: 42100, generatedAt: "2026-05-31" },
+      ],
       invoices: [
         { id: 1, client: "Bright Retail", amount: 120000, gst: 21600, date: "2026-05-28", due: "2026-06-12", status: "paid" },
         { id: 2, client: "Acme Corp", amount: 45000, gst: 8100, date: "2026-06-01", due: "2026-06-16", status: "pending" },
@@ -170,7 +225,15 @@
   function load() {
     try {
       var raw = localStorage.getItem(STORAGE_KEY);
-      state.data = raw ? JSON.parse(raw) : defaultData();
+      if (raw) {
+        state.data = JSON.parse(raw);
+        var def = defaultData();
+        ["payrollStructures", "employeePayroll", "payslips"].forEach(function (k) {
+          if (!state.data[k]) state.data[k] = def[k];
+        });
+      } else {
+        state.data = defaultData();
+      }
     } catch (e) {
       state.data = defaultData();
     }
@@ -184,6 +247,78 @@
   function esc(s) { var d = document.createElement("div"); d.textContent = s == null ? "" : String(s); return d.innerHTML; }
   function sum(arr, key) { return arr.reduce(function (t, x) { return t + Number(x[key] || 0); }, 0); }
   function nextId(arr) { return arr.reduce(function (m, x) { return Math.max(m, x.id || 0); }, 0) + 1; }
+
+  function getStructure(id) {
+    return state.data.payrollStructures.find(function (s) { return s.id === id; });
+  }
+
+  function getEmpPayroll(empId) {
+    return state.data.employeePayroll.find(function (p) { return p.empId === empId; });
+  }
+
+  function calcPayrollBreakdown(ctcAnnual, structure) {
+    var monthly = ctcAnnual / 12;
+    var basic = Math.round(monthly * (structure.basicPercent / 100));
+    var hra = Math.round(monthly * (structure.hraPercent / 100));
+    var special = Math.round(monthly * (structure.specialAllowancePercent / 100));
+    var transport = structure.transportAllowance || 0;
+    var medical = structure.medicalAllowance || 0;
+    var gross = basic + hra + special + transport + medical;
+    var pf = Math.round(basic * (structure.pfPercent / 100));
+    var esi = structure.esiPercent ? Math.round(gross * (structure.esiPercent / 100)) : 0;
+    var pt = structure.professionalTax || 0;
+    var tds = Math.round(gross * ((structure.tdsPercent || 0) / 100));
+    var deductions = pf + esi + pt + tds;
+    var net = gross - deductions;
+    return { basic: basic, hra: hra, special: special, transport: transport, medical: medical, gross: gross, pf: pf, esi: esi, pt: pt, tds: tds, deductions: deductions, net: net };
+  }
+
+  function generatePayslipHtml(emp, profile, structure, month) {
+    var b = calcPayrollBreakdown(profile.ctc, structure);
+    var company = state.data.company;
+    return (
+      "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><title>Payslip " + esc(emp.name) + " " + month + "</title>" +
+      "<style>body{font-family:Arial,sans-serif;max-width:640px;margin:40px auto;padding:24px;color:#111}" +
+      "h1{font-size:20px;margin:0 0 4px}table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}" +
+      "th,td{padding:8px 10px;border:1px solid #ddd;text-align:left}th{background:#f3f4f6}" +
+      ".net{font-size:18px;font-weight:bold;color:#4f46e5}.header{border-bottom:2px solid #4f46e5;padding-bottom:12px;margin-bottom:16px}" +
+      ".row{display:flex;justify-content:space-between;font-size:13px;margin:4px 0}</style></head><body>" +
+      '<div class="header"><h1>' + esc(company) + "</h1><p>Payslip for " + esc(month) + "</p></div>" +
+      '<div class="row"><span><strong>Employee:</strong> ' + esc(emp.name) + "</span><span><strong>Dept:</strong> " + esc(emp.dept) + "</span></div>" +
+      '<div class="row"><span><strong>PAN:</strong> ' + esc(profile.pan) + "</span><span><strong>UAN:</strong> " + esc(profile.uan || "—") + "</span></div>" +
+      '<div class="row"><span><strong>Bank:</strong> ' + esc(profile.bankAccount) + "</span><span><strong>Structure:</strong> " + esc(structure.name) + "</span></div>" +
+      "<h3>Earnings</h3><table><tr><th>Component</th><th>Amount (₹)</th></tr>" +
+      "<tr><td>Basic Salary</td><td>" + b.basic.toLocaleString("en-IN") + "</td></tr>" +
+      "<tr><td>HRA</td><td>" + b.hra.toLocaleString("en-IN") + "</td></tr>" +
+      "<tr><td>Special Allowance</td><td>" + b.special.toLocaleString("en-IN") + "</td></tr>" +
+      "<tr><td>Transport</td><td>" + b.transport.toLocaleString("en-IN") + "</td></tr>" +
+      "<tr><td>Medical</td><td>" + b.medical.toLocaleString("en-IN") + "</td></tr>" +
+      "<tr><th>Gross Salary</th><th>" + b.gross.toLocaleString("en-IN") + "</th></tr></table>" +
+      "<h3>Deductions</h3><table><tr><th>Component</th><th>Amount (₹)</th></tr>" +
+      "<tr><td>PF (" + structure.pfPercent + "%)</td><td>" + b.pf.toLocaleString("en-IN") + "</td></tr>" +
+      (b.esi ? "<tr><td>ESI</td><td>" + b.esi.toLocaleString("en-IN") + "</td></tr>" : "") +
+      "<tr><td>Professional Tax</td><td>" + b.pt.toLocaleString("en-IN") + "</td></tr>" +
+      (b.tds ? "<tr><td>TDS</td><td>" + b.tds.toLocaleString("en-IN") + "</td></tr>" : "") +
+      "<tr><th>Total Deductions</th><th>" + b.deductions.toLocaleString("en-IN") + "</th></tr></table>" +
+      '<p class="net">Net Pay: ₹' + b.net.toLocaleString("en-IN") + "</p>" +
+      "<p style=\"font-size:12px;color:#666\">Generated by BizBuilt AI · MarketMind Labs</p></body></html>"
+    );
+  }
+
+  function downloadPayslip(empId, month) {
+    var emp = state.data.employees.find(function (e) { return e.id === empId; });
+    var profile = getEmpPayroll(empId);
+    if (!emp || !profile) return;
+    var structure = getStructure(profile.structureId);
+    if (!structure) return;
+    var html = generatePayslipHtml(emp, profile, structure, month);
+    var blob = new Blob([html], { type: "text/html" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "Payslip_" + emp.name.replace(/\s+/g, "_") + "_" + month + ".html";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
 
   function kpis() {
     var d = state.data;
@@ -266,7 +401,7 @@
       '<div class="bb-widget-grid">' +
       '<div class="bb-widget"><label>Today\'s Revenue</label><strong>' + fmt(k.todayRevenue) + "</strong></div>" +
       '<div class="bb-widget"><label>Monthly Revenue</label><strong>' + fmt(k.monthlyRevenue) + '</strong><small class="' + (k.revDelta >= 0 ? "bb-score-high" : "bb-score-low") + '">' + (k.revDelta >= 0 ? "+" : "") + k.revDelta + '% vs last month</small></div>' +
-      '<div class="bb-widget"><label>Outstanding Invoices</label><strong>' + fmt(k.outstanding) + "<small>" + k.pendingInvoices + " pending</small></strong></div>" +
+      '<div class="bb-widget"><label>Outstanding Invoices</label><strong>' + fmt(k.outstanding) + '</strong><small>' + k.pendingInvoices + " pending</small></div>" +
       '<div class="bb-widget"><label>New Leads</label><strong>' + k.newLeads + "</strong></div>" +
       '<div class="bb-widget"><label>Tasks Due Today</label><strong>' + k.tasksDue + "</strong></div>" +
       '<div class="bb-widget"><label>Payroll Due</label><strong>' + k.payrollDue + "</strong></div>" +
@@ -347,7 +482,7 @@
   }
 
   function renderCrm() {
-    var tab = state.tab || "pipeline";
+    var tab = getTab("crm", "pipeline");
     var head = tabs([
       { id: "pipeline", label: "Sales Pipeline" },
       { id: "leads", label: "Lead Management" },
@@ -363,17 +498,19 @@
       return head +
         '<div class="bb-card"><h2>Add Lead</h2><form id="bb-form-lead" class="bb-form-grid">' +
         '<label>Company<input name="name" required></label><label>Contact<input name="contact" required></label>' +
-        '<label>Email<input name="email" type="email"></label><label>Value (₹)<input name="value" type="number"></label>' +
+        '<label>Email<input name="email" type="email"></label><label>Phone<input name="phone" placeholder="+91…"></label>' +
+        '<label>Value (₹)<input name="value" type="number" min="0"></label>' +
         '<label>Region<input name="region" placeholder="East, West…"></label>' +
-        '<label>Stage<select name="stage">' + PIPELINE.map(function (s) { return '<option>' + s + "</option>"; }).join("") + "</select></label>" +
+        '<label>Assigned To<input name="assigned" placeholder="Sales rep name"></label>' +
+        '<label>Stage<select name="stage">' + PIPELINE.map(function (s) { return "<option>" + esc(s) + "</option>"; }).join("") + "</select></label>" +
         '</form><button type="submit" form="bb-form-lead" class="bb-btn bb-btn-primary">Add Lead</button></div>' +
-        '<div class="bb-card"><h2>All Leads <span class="bb-pro-tag">AI Scoring</span></h2><div class="bb-table-wrap"><table class="bb-table"><thead><tr><th>Company</th><th>Contact</th><th>Stage</th><th>Score</th><th>Region</th><th>Value</th><th>Assigned</th></tr></thead><tbody>' +
+        '<div class="bb-card"><h2>All Leads <span class="bb-pro-tag">AI Scoring</span></h2><div class="bb-table-wrap"><table class="bb-table"><thead><tr><th>Company</th><th>Contact</th><th>Stage</th><th>Score</th><th>Region</th><th>Value</th><th>Assigned</th><th></th></tr></thead><tbody>' +
         state.data.leads.map(function (l) {
           var sc = l.score >= 80 ? "bb-score-high" : l.score >= 50 ? "bb-score-med" : "bb-score-low";
-          return "<tr><td>" + esc(l.name) + "</td><td>" + esc(l.contact) + "</td><td><span class=\"bb-status\">" + esc(l.stage) + "</span></td><td class=\"" + sc + "\">" + l.score + "</td><td>" + esc(l.region) + "</td><td>" + fmt(l.value) + "</td><td>" + esc(l.assigned) + "</td></tr>";
+          return "<tr><td>" + esc(l.name) + "</td><td>" + esc(l.contact) + "</td><td><span class=\"bb-status\">" + esc(l.stage) + "</span></td><td class=\"" + sc + "\">" + l.score + "</td><td>" + esc(l.region) + "</td><td>" + fmt(l.value) + "</td><td>" + esc(l.assigned) + '</td><td><button type="button" class="bb-btn" data-del-lead="' + l.id + '">Remove</button></td></tr>';
         }).join("") + "</tbody></table></div></div>";
     }
-    return head + '<div class="bb-card"><h2>Sales Pipeline</h2>' + renderPipeline() + "</div>";
+    return head + '<div class="bb-card"><h2>Sales Pipeline</h2><p style="color:var(--bb-muted);font-size:13px;margin:0 0 16px">Drag-free view of all 7 stages — New Lead through Won/Lost.</p>' + renderPipeline() + "</div>";
   }
 
   function renderInvoicesTable(rows) {
@@ -427,7 +564,7 @@
   }
 
   function renderFinance() {
-    var tab = state.tab || "banking";
+    var tab = getTab("finance", "banking");
     var head = tabs([{ id: "banking", label: "Banking" }, { id: "cashflow", label: "Cash Flow" }], tab);
     if (tab === "cashflow") {
       var k = kpis();
@@ -451,33 +588,159 @@
   }
 
   function renderHr() {
-    var tab = state.tab || "directory";
-    var head = tabs([{ id: "directory", label: "Directory" }, { id: "attendance", label: "Attendance" }, { id: "leave", label: "Leave" }], tab);
+    var tab = getTab("hr", "directory");
+    var head = tabs([
+      { id: "directory", label: "Employee Directory" },
+      { id: "attendance", label: "Attendance" },
+      { id: "leave", label: "Leave Management" },
+    ], tab);
     if (tab === "attendance") {
-      return head + '<div class="bb-card"><h2>Today\'s Attendance <span class="bb-pro-tag">GPS / Biometric ready</span></h2><div class="bb-table-wrap"><table class="bb-table"><thead><tr><th>Employee</th><th>Clock In</th><th>Clock Out</th><th>Type</th></tr></thead><tbody>' +
+      return head +
+        '<div class="bb-card"><h2>Clock In / Out <span class="bb-pro-tag">GPS / Biometric ready</span></h2>' +
+        '<form id="bb-form-attendance" class="bb-form-grid">' +
+        '<label>Employee<select name="empId" required>' + state.data.employees.map(function (e) {
+          return '<option value="' + e.id + '">' + esc(e.name) + "</option>";
+        }).join("") + "</select></label>" +
+        '<label>Clock In<input name="in" type="time" value="09:00"></label>' +
+        '<label>Clock Out<input name="out" type="time" value="18:00"></label>' +
+        '<label>Type<select name="type"><option value="office">Office</option><option value="remote">Remote</option><option value="field">Field</option></select></label>' +
+        '</form><button type="submit" form="bb-form-attendance" class="bb-btn bb-btn-primary">Record Attendance</button></div>' +
+        '<div class="bb-card"><h2>Today\'s Attendance</h2><div class="bb-table-wrap"><table class="bb-table"><thead><tr><th>Employee</th><th>Date</th><th>Clock In</th><th>Clock Out</th><th>Type</th></tr></thead><tbody>' +
         state.data.attendance.map(function (a) {
           var emp = state.data.employees.find(function (e) { return e.id === a.empId; });
-          return "<tr><td>" + esc(emp ? emp.name : "—") + "</td><td>" + esc(a.in) + "</td><td>" + esc(a.out) + "</td><td>" + esc(a.type) + "</td></tr>";
+          return "<tr><td>" + esc(emp ? emp.name : "—") + "</td><td>" + esc(a.date) + "</td><td>" + esc(a.in) + "</td><td>" + esc(a.out) + "</td><td>" + esc(a.type) + "</td></tr>";
         }).join("") + "</tbody></table></div></div>";
     }
     if (tab === "leave") {
-      return head + '<div class="bb-card"><h2>Leave Requests</h2><div class="bb-table-wrap"><table class="bb-table"><thead><tr><th>Employee</th><th>Type</th><th>From</th><th>To</th><th>Status</th></tr></thead><tbody>' +
+      return head +
+        '<div class="bb-card"><h2>Apply for Leave</h2><form id="bb-form-leave" class="bb-form-grid">' +
+        '<label>Employee<select name="empId" required>' + state.data.employees.map(function (e) {
+          return '<option value="' + e.id + '">' + esc(e.name) + "</option>";
+        }).join("") + "</select></label>" +
+        '<label>Leave Type<select name="type"><option>Casual</option><option>Sick</option><option>Paid</option></select></label>' +
+        '<label>From<input name="from" type="date" required></label><label>To<input name="to" type="date" required></label>' +
+        '</form><button type="submit" form="bb-form-leave" class="bb-btn bb-btn-primary">Submit Leave Request</button></div>' +
+        '<div class="bb-card"><h2>Leave Requests</h2><div class="bb-table-wrap"><table class="bb-table"><thead><tr><th>Employee</th><th>Type</th><th>From</th><th>To</th><th>Status</th><th></th></tr></thead><tbody>' +
         state.data.leaves.map(function (l) {
           var emp = state.data.employees.find(function (e) { return e.id === l.empId; });
-          return "<tr><td>" + esc(emp ? emp.name : "—") + "</td><td>" + esc(l.type) + "</td><td>" + esc(l.from) + "</td><td>" + esc(l.to) + "</td><td><span class=\"bb-status pending\">" + esc(l.status) + "</span></td></tr>";
+          return "<tr><td>" + esc(emp ? emp.name : "—") + "</td><td>" + esc(l.type) + "</td><td>" + esc(l.from) + "</td><td>" + esc(l.to) + "</td><td><span class=\"bb-status pending\">" + esc(l.status) + '</span></td><td><button type="button" class="bb-btn" data-approve-leave="' + l.id + '">Approve</button></td></tr>';
         }).join("") + "</tbody></table></div></div>";
     }
     return head +
-      '<div class="bb-card"><h2>Employee Directory</h2><div class="bb-table-wrap"><table class="bb-table"><thead><tr><th>Name</th><th>Role</th><th>Dept</th><th>Skills</th><th>Salary</th></tr></thead><tbody>' +
+      '<div class="bb-card"><h2>Add Employee</h2><form id="bb-form-emp" class="bb-form-grid">' +
+      '<label>Full Name<input name="name" required></label><label>Role<input name="role" required></label>' +
+      '<label>Department<input name="dept" required></label><label>Join Date<input name="join" type="date"></label>' +
+      '<label>Monthly Salary (₹)<input name="salary" type="number" min="0"></label>' +
+      '<label>Skills<input name="skills" placeholder="e.g. CRM, Excel"></label>' +
+      '</form><button type="submit" form="bb-form-emp" class="bb-btn bb-btn-primary">Add Employee</button></div>' +
+      '<div class="bb-card"><h2>Employee Directory</h2><div class="bb-table-wrap"><table class="bb-table"><thead><tr><th>Name</th><th>Role</th><th>Dept</th><th>Skills</th><th>Salary</th><th>Status</th><th></th></tr></thead><tbody>' +
       state.data.employees.map(function (e) {
-        return "<tr><td>" + esc(e.name) + "</td><td>" + esc(e.role) + "</td><td>" + esc(e.dept) + "</td><td>" + esc(e.skills) + "</td><td>" + fmt(e.salary) + "</td></tr>";
+        return "<tr><td>" + esc(e.name) + "</td><td>" + esc(e.role) + "</td><td>" + esc(e.dept) + "</td><td>" + esc(e.skills) + "</td><td>" + fmt(e.salary) + "</td><td>" + esc(e.status || "active") + '</td><td><button type="button" class="bb-btn" data-del-emp="' + e.id + '">Remove</button></td></tr>';
       }).join("") + "</tbody></table></div></div>";
   }
 
+  function renderPayrollStructureCard(s) {
+    var sample = calcPayrollBreakdown(660000, s);
+    return (
+      '<div class="bb-card" style="margin-bottom:12px">' +
+      "<h3>" + esc(s.name) + ' <button type="button" class="bb-btn" data-del-structure="' + s.id + '" style="float:right;font-size:12px">Delete</button></h3>' +
+      "<p style=\"color:var(--bb-muted);font-size:13px;margin:0 0 12px\">" + esc(s.description) + "</p>" +
+      '<div class="bb-form-grid" style="font-size:13px">' +
+      "<div><strong>Basic:</strong> " + s.basicPercent + "%</div><div><strong>HRA:</strong> " + s.hraPercent + "%</div>" +
+      "<div><strong>Transport:</strong> " + fmt(s.transportAllowance) + "</div><div><strong>Medical:</strong> " + fmt(s.medicalAllowance) + "</div>" +
+      "<div><strong>Special:</strong> " + s.specialAllowancePercent + "%</div><div><strong>PF:</strong> " + s.pfPercent + "%</div>" +
+      "<div><strong>ESI:</strong> " + s.esiPercent + "%</div><div><strong>Prof. Tax:</strong> " + fmt(s.professionalTax) + "</div>" +
+      "<div><strong>TDS:</strong> " + s.tdsPercent + "%</div><div><strong>Saved:</strong> " + esc(s.savedAt) + "</div>" +
+      "</div><p style=\"margin-top:12px;font-size:13px\"><strong>Sample (₹6.6L CTC):</strong> Gross " + fmt(sample.gross) + " → Net " + fmt(sample.net) + "</p></div>"
+    );
+  }
+
   function renderPayroll() {
-    var total = sum(state.data.employees, "salary");
-    return '<div class="bb-kpi-grid"><div class="bb-kpi"><label>Monthly Payroll</label><strong>' + fmt(total) + "</strong></div></div>" +
-      '<div class="bb-card"><h2>Process Payroll <span class="bb-pro-tag">AI Error Detection</span></h2><button type="button" class="bb-btn bb-btn-primary" id="bb-run-payroll">Run Payroll — ' + new Date().toISOString().slice(0, 7) + "</button></div>" +
+    var tab = getTab("payroll", "structure");
+    var head = tabs([
+      { id: "structure", label: "Salary Structure" },
+      { id: "employees", label: "Employee Payroll" },
+      { id: "process", label: "Process Payroll" },
+      { id: "payslips", label: "Payslips" },
+    ], tab);
+
+    if (tab === "structure") {
+      return head +
+        '<div class="bb-card"><h2>Define & Save Payroll Structure</h2>' +
+        "<p style=\"color:var(--bb-muted);font-size:13px;margin:0 0 16px\">Create a reusable salary template with earnings and deductions. Save it and assign to employees.</p>" +
+        '<form id="bb-form-structure" class="bb-form-grid">' +
+        '<label>Structure Name<input name="name" required placeholder="e.g. Standard SME India"></label>' +
+        '<label>Description<input name="description" placeholder="Brief notes"></label>' +
+        '<label>Basic Salary %<input name="basicPercent" type="number" min="0" max="100" value="50" required></label>' +
+        '<label>HRA %<input name="hraPercent" type="number" min="0" max="100" value="20"></label>' +
+        '<label>Special Allowance %<input name="specialAllowancePercent" type="number" min="0" max="100" value="10"></label>' +
+        '<label>Transport Allowance (₹)<input name="transportAllowance" type="number" min="0" value="1600"></label>' +
+        '<label>Medical Allowance (₹)<input name="medicalAllowance" type="number" min="0" value="1250"></label>' +
+        '<label>PF Deduction %<input name="pfPercent" type="number" min="0" max="100" value="12"></label>' +
+        '<label>ESI Deduction %<input name="esiPercent" type="number" min="0" max="100" value="0.75" step="0.01"></label>' +
+        '<label>Professional Tax (₹)<input name="professionalTax" type="number" min="0" value="200"></label>' +
+        '<label>TDS %<input name="tdsPercent" type="number" min="0" max="100" value="5"></label>' +
+        '</form><button type="submit" form="bb-form-structure" class="bb-btn bb-btn-primary">Save Structure for Later Use</button></div>' +
+        "<h2 style=\"margin:24px 0 12px;font-size:1rem\">Saved Structures (" + state.data.payrollStructures.length + ")</h2>" +
+        state.data.payrollStructures.map(renderPayrollStructureCard).join("");
+    }
+
+    if (tab === "employees") {
+      return head +
+        '<div class="bb-card"><h2>Assign Payroll to Employee</h2><form id="bb-form-emp-payroll" class="bb-form-grid">' +
+        '<label>Employee<select name="empId" required>' + state.data.employees.map(function (e) {
+          return '<option value="' + e.id + '">' + esc(e.name) + "</option>";
+        }).join("") + "</select></label>" +
+        '<label>Salary Structure<select name="structureId" required>' + state.data.payrollStructures.map(function (s) {
+          return '<option value="' + s.id + '">' + esc(s.name) + "</option>";
+        }).join("") + "</select></label>" +
+        '<label>Annual CTC (₹)<input name="ctc" type="number" min="0" required placeholder="660000"></label>' +
+        '<label>PAN<input name="pan" placeholder="ABCDE1234F"></label>' +
+        '<label>UAN<input name="uan" placeholder="PF UAN number"></label>' +
+        '<label>Bank Account<input name="bankAccount" placeholder="HDFC ****1234"></label>' +
+        '</form><button type="submit" form="bb-form-emp-payroll" class="bb-btn bb-btn-primary">Save Employee Payroll</button></div>' +
+        '<div class="bb-card"><h2>Employee Payroll Profiles</h2><div class="bb-table-wrap"><table class="bb-table"><thead><tr><th>Employee</th><th>Structure</th><th>CTC (Annual)</th><th>Monthly Net (est.)</th><th>PAN</th><th>Bank</th></tr></thead><tbody>' +
+        state.data.employeePayroll.map(function (p) {
+          var emp = state.data.employees.find(function (e) { return e.id === p.empId; });
+          var str = getStructure(p.structureId);
+          var net = str ? calcPayrollBreakdown(p.ctc, str).net : 0;
+          return "<tr><td>" + esc(emp ? emp.name : "—") + "</td><td>" + esc(str ? str.name : "—") + "</td><td>" + fmt(p.ctc) + "</td><td>" + fmt(net) + "</td><td>" + esc(p.pan) + "</td><td>" + esc(p.bankAccount) + "</td></tr>";
+        }).join("") + "</tbody></table></div></div>";
+    }
+
+    if (tab === "payslips") {
+      var month = new Date().toISOString().slice(0, 7);
+      return head +
+        '<div class="bb-card"><h2>Download Payslips</h2>' +
+        "<p style=\"color:var(--bb-muted);font-size:13px;margin:0 0 16px\">Generate and download individual payslips as HTML (print-ready). Select month and employee below.</p>" +
+        '<div class="bb-form-grid" style="margin-bottom:16px">' +
+        '<label>Payroll Month<input type="month" id="bb-payslip-month" value="' + month + '"></label></div>' +
+        '<div class="bb-table-wrap"><table class="bb-table"><thead><tr><th>Employee</th><th>Structure</th><th>Est. Net Pay</th><th>Last Generated</th><th>Download</th></tr></thead><tbody>' +
+        state.data.employeePayroll.map(function (p) {
+          var emp = state.data.employees.find(function (e) { return e.id === p.empId; });
+          var str = getStructure(p.structureId);
+          var net = str ? calcPayrollBreakdown(p.ctc, str).net : 0;
+          var slip = state.data.payslips.filter(function (s) { return s.empId === p.empId; }).sort(function (a, b) { return b.month.localeCompare(a.month); })[0];
+          return "<tr><td>" + esc(emp ? emp.name : "—") + "</td><td>" + esc(str ? str.name : "—") + "</td><td>" + fmt(net) + "</td><td>" + (slip ? esc(slip.month) : "—") + '</td><td><button type="button" class="bb-btn bb-btn-primary" data-download-payslip="' + p.empId + '">⬇ Download Payslip</button></td></tr>';
+        }).join("") + "</tbody></table></div></div>" +
+        '<div class="bb-card"><h2>Payslip History</h2><div class="bb-table-wrap"><table class="bb-table"><thead><tr><th>Employee</th><th>Month</th><th>Gross</th><th>Deductions</th><th>Net Pay</th><th></th></tr></thead><tbody>' +
+        state.data.payslips.map(function (s) {
+          var emp = state.data.employees.find(function (e) { return e.id === s.empId; });
+          return "<tr><td>" + esc(emp ? emp.name : "—") + "</td><td>" + esc(s.month) + "</td><td>" + fmt(s.gross) + "</td><td>" + fmt(s.deductions) + "</td><td>" + fmt(s.net) + '</td><td><button type="button" class="bb-btn" data-download-payslip-hist="' + s.empId + '" data-payslip-month="' + esc(s.month) + '">Download</button></td></tr>';
+        }).join("") + "</tbody></table></div></div>";
+    }
+
+    var totalNet = state.data.employeePayroll.reduce(function (t, p) {
+      var str = getStructure(p.structureId);
+      return t + (str ? calcPayrollBreakdown(p.ctc, str).net : 0);
+    }, 0);
+    return head +
+      '<div class="bb-kpi-grid"><div class="bb-kpi"><label>Total Monthly Net</label><strong>' + fmt(totalNet) + "</strong></div>" +
+      '<div class="bb-kpi"><label>Employees</label><strong>' + state.data.employeePayroll.length + "</strong></div></div>" +
+      '<div class="bb-card"><h2>Process Payroll <span class="bb-pro-tag">AI Error Detection</span></h2>' +
+      "<p style=\"color:var(--bb-muted);font-size:13px;margin:0 0 16px\">Generates payslips for all employees using saved structures and records payroll run.</p>" +
+      '<label style="display:block;margin-bottom:12px;font-size:13px">Payroll Month <input type="month" id="bb-process-month" value="' + new Date().toISOString().slice(0, 7) + '" style="margin-left:8px;padding:6px 10px;border:1px solid var(--bb-line);border-radius:6px"></label>' +
+      '<button type="button" class="bb-btn bb-btn-primary" id="bb-run-payroll">Run Payroll & Generate Payslips</button></div>' +
       '<div class="bb-card"><h2>Payroll History</h2><div class="bb-table-wrap"><table class="bb-table"><thead><tr><th>Month</th><th>Employees</th><th>Total</th><th>Status</th></tr></thead><tbody>' +
       state.data.payrollRuns.map(function (p) {
         return "<tr><td>" + esc(p.month) + "</td><td>" + p.employees + "</td><td>" + fmt(p.total) + '</td><td><span class="bb-status ' + esc(p.status) + '">' + esc(p.status) + "</span></td></tr>";
@@ -557,40 +820,184 @@
     if (leadForm) leadForm.onsubmit = function (e) {
       e.preventDefault();
       var fd = new FormData(leadForm);
-      state.data.leads.push({ id: nextId(state.data.leads), name: fd.get("name"), contact: fd.get("contact"), email: fd.get("email"), stage: fd.get("stage"), value: Number(fd.get("value")) || 0, score: 50 + Math.floor(Math.random() * 40), region: fd.get("region") || "—", assigned: "Unassigned" });
-      save(); render();
+      state.data.leads.push({
+        id: nextId(state.data.leads), name: fd.get("name"), contact: fd.get("contact"),
+        email: fd.get("email"), phone: fd.get("phone") || "", stage: fd.get("stage"),
+        value: Number(fd.get("value")) || 0, score: 50 + Math.floor(Math.random() * 40),
+        region: fd.get("region") || "—", assigned: fd.get("assigned") || "Unassigned",
+      });
+      save(); refreshView();
     };
+
+    var empForm = document.getElementById("bb-form-emp");
+    if (empForm) empForm.onsubmit = function (e) {
+      e.preventDefault();
+      var fd = new FormData(empForm);
+      var id = nextId(state.data.employees);
+      state.data.employees.push({
+        id: id, name: fd.get("name"), role: fd.get("role"), dept: fd.get("dept"),
+        join: fd.get("join") || new Date().toISOString().slice(0, 10),
+        salary: Number(fd.get("salary")) || 0, skills: fd.get("skills") || "", status: "active",
+      });
+      save(); refreshView();
+    };
+
+    var attForm = document.getElementById("bb-form-attendance");
+    if (attForm) attForm.onsubmit = function (e) {
+      e.preventDefault();
+      var fd = new FormData(attForm);
+      state.data.attendance.unshift({
+        id: nextId(state.data.attendance), empId: Number(fd.get("empId")),
+        date: new Date().toISOString().slice(0, 10), in: fd.get("in"), out: fd.get("out"), type: fd.get("type"),
+      });
+      save(); refreshView();
+    };
+
+    var leaveForm = document.getElementById("bb-form-leave");
+    if (leaveForm) leaveForm.onsubmit = function (e) {
+      e.preventDefault();
+      var fd = new FormData(leaveForm);
+      state.data.leaves.push({
+        id: nextId(state.data.leaves), empId: Number(fd.get("empId")),
+        type: fd.get("type"), from: fd.get("from"), to: fd.get("to"), status: "pending",
+      });
+      save(); refreshView();
+    };
+
+    var structForm = document.getElementById("bb-form-structure");
+    if (structForm) structForm.onsubmit = function (e) {
+      e.preventDefault();
+      var fd = new FormData(structForm);
+      state.data.payrollStructures.push({
+        id: nextId(state.data.payrollStructures),
+        name: fd.get("name"), description: fd.get("description") || "",
+        basicPercent: Number(fd.get("basicPercent")), hraPercent: Number(fd.get("hraPercent")),
+        specialAllowancePercent: Number(fd.get("specialAllowancePercent")),
+        transportAllowance: Number(fd.get("transportAllowance")),
+        medicalAllowance: Number(fd.get("medicalAllowance")),
+        pfPercent: Number(fd.get("pfPercent")), esiPercent: Number(fd.get("esiPercent")),
+        professionalTax: Number(fd.get("professionalTax")), tdsPercent: Number(fd.get("tdsPercent")),
+        savedAt: new Date().toISOString().slice(0, 10),
+      });
+      save(); refreshView();
+    };
+
+    var empPayForm = document.getElementById("bb-form-emp-payroll");
+    if (empPayForm) empPayForm.onsubmit = function (e) {
+      e.preventDefault();
+      var fd = new FormData(empPayForm);
+      var empId = Number(fd.get("empId"));
+      var existing = getEmpPayroll(empId);
+      var row = {
+        empId: empId, structureId: Number(fd.get("structureId")), ctc: Number(fd.get("ctc")),
+        pan: fd.get("pan") || "", uan: fd.get("uan") || "", bankAccount: fd.get("bankAccount") || "",
+      };
+      if (existing) {
+        Object.assign(existing, row);
+      } else {
+        state.data.employeePayroll.push(row);
+      }
+      save(); refreshView();
+    };
+
     var invForm = document.getElementById("bb-form-inv");
     if (invForm) invForm.onsubmit = function (e) {
       e.preventDefault();
       var fd = new FormData(invForm);
       state.data.invoices.push({ id: nextId(state.data.invoices), client: fd.get("client"), amount: Number(fd.get("amount")), gst: Number(fd.get("gst")) || 0, date: new Date().toISOString().slice(0, 10), due: fd.get("due"), status: fd.get("status") });
-      save(); render();
+      save(); refreshView();
     };
+
     var expForm = document.getElementById("bb-form-exp");
     if (expForm) expForm.onsubmit = function (e) {
       e.preventDefault();
       var fd = new FormData(expForm);
       state.data.expenses.push({ id: nextId(state.data.expenses), category: fd.get("category"), vendor: fd.get("vendor"), amount: Number(fd.get("amount")), date: fd.get("date") || new Date().toISOString().slice(0, 10), recurring: fd.get("recurring") === "true" });
-      save(); render();
+      save(); refreshView();
     };
+
     var payrollBtn = document.getElementById("bb-run-payroll");
     if (payrollBtn) payrollBtn.onclick = function () {
-      state.data.payrollRuns.unshift({ id: nextId(state.data.payrollRuns), month: new Date().toISOString().slice(0, 7), total: sum(state.data.employees, "salary"), status: "pending", employees: state.data.employees.length });
-      save(); render();
+      var monthEl = document.getElementById("bb-process-month");
+      var month = monthEl ? monthEl.value : new Date().toISOString().slice(0, 7);
+      var total = 0;
+      state.data.employeePayroll.forEach(function (p) {
+        var str = getStructure(p.structureId);
+        if (!str) return;
+        var b = calcPayrollBreakdown(p.ctc, str);
+        total += b.net;
+        var existing = state.data.payslips.find(function (s) { return s.empId === p.empId && s.month === month; });
+        if (existing) {
+          existing.gross = b.gross; existing.deductions = b.deductions; existing.net = b.net;
+        } else {
+          state.data.payslips.push({ id: nextId(state.data.payslips), empId: p.empId, month: month, gross: b.gross, deductions: b.deductions, net: b.net, generatedAt: new Date().toISOString().slice(0, 10) });
+        }
+      });
+      state.data.payrollRuns.unshift({ id: nextId(state.data.payrollRuns), month: month, total: total, status: "paid", employees: state.data.employeePayroll.length });
+      save(); refreshView();
     };
+
+    document.querySelectorAll("[data-del-lead]").forEach(function (btn) {
+      btn.onclick = function () {
+        var id = Number(btn.getAttribute("data-del-lead"));
+        state.data.leads = state.data.leads.filter(function (l) { return l.id !== id; });
+        save(); refreshView();
+      };
+    });
+
+    document.querySelectorAll("[data-del-emp]").forEach(function (btn) {
+      btn.onclick = function () {
+        var id = Number(btn.getAttribute("data-del-emp"));
+        state.data.employees = state.data.employees.filter(function (e) { return e.id !== id; });
+        state.data.employeePayroll = state.data.employeePayroll.filter(function (p) { return p.empId !== id; });
+        save(); refreshView();
+      };
+    });
+
+    document.querySelectorAll("[data-approve-leave]").forEach(function (btn) {
+      btn.onclick = function () {
+        var id = Number(btn.getAttribute("data-approve-leave"));
+        var leave = state.data.leaves.find(function (l) { return l.id === id; });
+        if (leave) leave.status = "approved";
+        save(); refreshView();
+      };
+    });
+
+    document.querySelectorAll("[data-del-structure]").forEach(function (btn) {
+      btn.onclick = function () {
+        var id = Number(btn.getAttribute("data-del-structure"));
+        if (!confirm("Delete this payroll structure?")) return;
+        state.data.payrollStructures = state.data.payrollStructures.filter(function (s) { return s.id !== id; });
+        save(); refreshView();
+      };
+    });
+
+    document.querySelectorAll("[data-download-payslip]").forEach(function (btn) {
+      btn.onclick = function () {
+        var empId = Number(btn.getAttribute("data-download-payslip"));
+        var monthEl = document.getElementById("bb-payslip-month");
+        var month = monthEl ? monthEl.value : new Date().toISOString().slice(0, 7);
+        downloadPayslip(empId, month);
+      };
+    });
+
+    document.querySelectorAll("[data-download-payslip-hist]").forEach(function (btn) {
+      btn.onclick = function () {
+        downloadPayslip(Number(btn.getAttribute("data-download-payslip-hist")), btn.getAttribute("data-payslip-month"));
+      };
+    });
+
     var chatForm = document.getElementById("bb-chat-form");
     if (chatForm) chatForm.onsubmit = function (e) {
       e.preventDefault();
       var input = document.getElementById("bb-chat-input");
-      var q = (input.value || "").trim();
+      var q = (input && input.value || "").trim();
       if (!q) return;
       state.data.chatHistory.push({ role: "user", text: q });
       state.data.chatHistory.push({ role: "ai", text: copilotReply(q) });
       save(); render();
-      var msgs = document.getElementById("bb-chat-msgs");
-      if (msgs) msgs.scrollTop = msgs.scrollHeight;
     };
+
     document.querySelectorAll("[data-ask]").forEach(function (btn) {
       btn.onclick = function () {
         var q = btn.getAttribute("data-ask");
@@ -599,13 +1006,25 @@
         save(); render();
       };
     });
+
     var docSearch = document.getElementById("bb-doc-search");
     if (docSearch) docSearch.oninput = function () {
       state.docQuery = docSearch.value;
-      var content = document.getElementById("bb-view-content");
-      if (content) content.innerHTML = renderDocuments();
-      bindForms();
+      refreshView();
     };
+  }
+
+  var tabDelegationReady = false;
+  function initTabDelegation() {
+    if (tabDelegationReady) return;
+    tabDelegationReady = true;
+    document.addEventListener("click", function (e) {
+      var tabBtn = e.target.closest("[data-tab]");
+      if (!tabBtn || !tabBtn.closest("#bb-view-content")) return;
+      e.preventDefault();
+      state.tabs[state.view] = tabBtn.getAttribute("data-tab");
+      refreshView();
+    });
   }
 
   function render() {
@@ -636,18 +1055,7 @@
     root.querySelectorAll("[data-view]").forEach(function (btn) {
       btn.onclick = function () {
         state.view = btn.getAttribute("data-view");
-        state.tab = "";
         render();
-      };
-    });
-    root.querySelectorAll("[data-tab]").forEach(function (btn) {
-      btn.onclick = function () {
-        state.tab = btn.getAttribute("data-tab");
-        document.getElementById("bb-view-content").innerHTML = (RENDERERS[state.view] || renderDashboard)();
-        bindForms();
-        root.querySelectorAll("[data-tab]").forEach(function (b) {
-          b.classList.toggle("active", b.getAttribute("data-tab") === state.tab);
-        });
       };
     });
 
@@ -657,7 +1065,7 @@
 
     var reset = document.getElementById("bb-reset-demo");
     if (reset) reset.onclick = function () {
-      if (confirm("Reset all demo data?")) { state.data = defaultData(); state.tab = ""; save(); render(); }
+      if (confirm("Reset all demo data?")) { state.data = defaultData(); state.tabs = {}; save(); render(); }
     };
 
     bindForms();
@@ -666,6 +1074,7 @@
   }
 
   load();
+  initTabDelegation();
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", render);
   else render();
 })();
