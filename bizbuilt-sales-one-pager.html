@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BizBuilt AI — Sales One-Pager | MarketMind Labs</title>
+<style>
+  @page { size: A4; margin: 14mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", Inter, system-ui, sans-serif;
+    color: #0f172a;
+    margin: 0;
+    padding: 24px;
+    line-height: 1.45;
+    font-size: 11pt;
+    background: #fff;
+  }
+  .no-print {
+    position: sticky;
+    top: 0;
+    background: #eef2ff;
+    border-bottom: 1px solid #c7d2fe;
+    padding: 12px 16px;
+    margin: -24px -24px 20px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .no-print button, .no-print a {
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    text-decoration: none;
+    border: none;
+  }
+  .btn-primary { background: #6366f1; color: #fff; }
+  .btn-secondary { background: #fff; color: #4f46e5; border: 1px solid #c7d2fe; }
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    border-bottom: 3px solid #6366f1;
+    padding-bottom: 14px;
+    margin-bottom: 18px;
+  }
+  header img { width: 52px; height: 52px; border-radius: 10px; }
+  header h1 { margin: 0; font-size: 22pt; line-height: 1.1; color: #312e81; }
+  header p { margin: 4px 0 0; font-size: 10pt; color: #64748b; }
+  .tagline {
+    background: linear-gradient(135deg, #0f172a, #4f46e5);
+    color: #fff;
+    padding: 14px 16px;
+    border-radius: 10px;
+    margin-bottom: 18px;
+    font-size: 12pt;
+    font-weight: 600;
+  }
+  h2 { font-size: 13pt; color: #312e81; margin: 16px 0 8px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .box {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px 12px;
+    background: #f8fafc;
+  }
+  .box strong { display: block; font-size: 10pt; margin-bottom: 4px; color: #312e81; }
+  .box p, .box li { margin: 0; font-size: 9.5pt; color: #475569; }
+  ul.compact { margin: 0; padding-left: 16px; font-size: 9.5pt; color: #334155; }
+  ul.compact li { margin: 3px 0; }
+  .price-card {
+    text-align: center;
+    border: 1px solid #c7d2fe;
+    border-radius: 8px;
+    padding: 10px 8px;
+    background: #fff;
+  }
+  .price-card.featured { border-color: #6366f1; background: #eef2ff; }
+  .price-card h3 { margin: 0 0 2px; font-size: 11pt; }
+  .price-card .emps { font-size: 8.5pt; color: #64748b; margin-bottom: 6px; }
+  .price-card .amt { font-size: 14pt; font-weight: 800; color: #312e81; }
+  .price-card .amt span { font-size: 8pt; font-weight: 500; }
+  .arch {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 12px;
+    border: 1px dashed #94a3b8;
+    border-radius: 8px;
+    font-size: 9pt;
+    margin: 8px 0;
+  }
+  .arch span {
+    padding: 6px 10px;
+    background: #fff;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-weight: 600;
+  }
+  .arch .arrow { color: #6366f1; font-weight: 700; }
+  footer {
+    margin-top: 16px;
+    padding-top: 10px;
+    border-top: 1px solid #e2e8f0;
+    font-size: 9pt;
+    color: #64748b;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  @media print {
+    .no-print { display: none !important; }
+    body { padding: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="no-print">
+  <button type="button" class="btn-primary" onclick="window.print()">Save as PDF / Print</button>
+  <a class="btn-secondary" href="bizbuilt-ai.html">← Back to product page</a>
+  <span style="font-size:13px;color:#475569">Use <strong>Ctrl+P</strong> → Save as PDF to share on WhatsApp or email.</span>
+</div>
+
+<header>
+  <div>
+    <h1>BizBuilt AI</h1>
+    <p>The Operating System for SMEs · by MarketMind Labs</p>
+    <p><strong>workpilottools.biz/bizbuilt-ai</strong></p>
+  </div>
+  <img src="assets/marketmind-labs-logo.png" alt="MarketMind Labs">
+</header>
+
+<div class="tagline">Your domain · Your Google Cloud · Your data — one platform for CRM, HR, payroll, inventory &amp; AI.</div>
+
+<h2>The problem</h2>
+<p style="margin:0 0 10px;font-size:10pt">Indian SMEs run on Excel, WhatsApp, and 5–10 disconnected apps. Owners lose visibility on revenue, stock, payroll, and follow-ups. Data sits on personal phones — not secure, not scalable.</p>
+
+<h2>The solution — BizBuilt AI</h2>
+<div class="grid-2">
+  <div class="box">
+    <strong>15+ modules, one login</strong>
+    <ul class="compact">
+      <li>CRM, Invoices, Expenses, Revenue, Analytics</li>
+      <li>HR, Payroll, Payslips, Salary structures</li>
+      <li>Inventory, Barcode sales, Procurement</li>
+      <li>Finance, Quotations, Projects, Marketing, Support</li>
+      <li>AI Copilot — ask anything about your business</li>
+    </ul>
+  </div>
+  <div class="box">
+    <strong>Why SMEs choose us</strong>
+    <ul class="compact">
+      <li>Deployed on <strong>your domain</strong> (erp.yourcompany.com)</li>
+      <li>Data stored in <strong>your Google Cloud</strong> project</li>
+      <li>India region (Mumbai) — data residency</li>
+      <li>Google Sign-In / Workspace login</li>
+      <li>Daily backups in your project · export anytime</li>
+    </ul>
+  </div>
+</div>
+
+<h2>Architecture — data stays with you</h2>
+<div class="arch">
+  <span>Employees</span><span class="arrow">→</span>
+  <span>erp.yourcompany.com</span><span class="arrow">→</span>
+  <span>Cloud Run (BizBuilt)</span><span class="arrow">→</span>
+  <span>Cloud SQL + Storage</span>
+</div>
+<p style="margin:0;font-size:9pt;color:#64748b">You pay Google directly for infrastructure (~₹2,000–₹8,000/mo). MarketMind Labs charges software license + deployment + support.</p>
+
+<h2>Pricing by team size</h2>
+<div class="grid-4">
+  <div class="price-card">
+    <h3>Starter</h3>
+    <div class="emps">1–10 employees</div>
+    <div class="amt">₹2,999<span>/mo</span></div>
+    <div class="emps">₹8,249/qtr · ₹30,590/yr</div>
+  </div>
+  <div class="price-card featured">
+    <h3>Growth</h3>
+    <div class="emps">11–50 employees</div>
+    <div class="amt">₹7,999<span>/mo</span></div>
+    <div class="emps">₹22,037/qtr · ₹81,590/yr</div>
+  </div>
+  <div class="price-card">
+    <h3>Business</h3>
+    <div class="emps">51–200 employees</div>
+    <div class="amt">₹19,999<span>/mo</span></div>
+    <div class="emps">₹55,197/qtr · ₹2,03,890/yr</div>
+  </div>
+  <div class="price-card">
+    <h3>Enterprise</h3>
+    <div class="emps">200+ employees</div>
+    <div class="amt">Custom</div>
+    <div class="emps">SLA · API · Multi-branch</div>
+  </div>
+</div>
+<p style="margin:8px 0 0;font-size:9pt">Setup &amp; deployment from <strong>₹15,000</strong> one-time. Quarterly (−8%) and yearly (−15%) billing available.</p>
+
+<h2>How we deploy (2–3 weeks)</h2>
+<div class="grid-3">
+  <div class="box"><strong>1. Discovery</strong><p>Team size, modules, billing cycle, domain name.</p></div>
+  <div class="box"><strong>2. Your GCP</strong><p>We provision Cloud SQL, Cloud Run, Storage in your project (Mumbai).</p></div>
+  <div class="box"><strong>3. Go live</strong><p>Custom domain, Google login, training, data import, support handoff.</p></div>
+</div>
+
+<h2>Contact</h2>
+<div class="grid-2">
+  <div class="box">
+    <strong>MarketMind Labs · WorkPilot Tools</strong>
+    <p>Email: <strong>mml.products26@gmail.com</strong></p>
+    <p>Web: workpilottools.biz/bizbuilt-ai</p>
+    <p>Demo: workpilottools.biz/bizbuilt (free, no signup)</p>
+  </div>
+  <div class="box">
+    <strong>Next step</strong>
+    <p>Book a 15-minute call. We’ll show the live demo and quote deployment for your team size.</p>
+    <p>Subject line: <em>BizBuilt AI — Deploy on My GCP</em></p>
+  </div>
+</div>
+
+<footer>
+  <span>© 2026 MarketMind Labs. All rights reserved.</span>
+  <span>BizBuilt AI — Confidential sales document</span>
+</footer>
+</body>
+</html>

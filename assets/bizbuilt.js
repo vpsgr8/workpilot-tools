@@ -229,25 +229,31 @@
     };
   }
 
-  function load() {
+  function migrateData(data) {
+    var def = defaultData();
+    ["payrollStructures", "employeePayroll", "payslips", "stockMovements"].forEach(function (k) {
+      if (!data[k]) data[k] = def[k];
+    });
+    if (data.products) {
+      data.products.forEach(function (p) {
+        if (!p.barcode) p.barcode = "8901234567" + String(890 + p.id).slice(-3);
+        if (p.mrp == null) p.mrp = p.unitPrice ? Math.round(p.unitPrice * 1.15) : 0;
+        if (p.salePrice == null) p.salePrice = p.unitPrice || 0;
+        if (p.discountPercent == null && p.mrp > 0) {
+          p.discountPercent = Math.round((1 - p.salePrice / p.mrp) * 1000) / 10;
+        }
+        p.unitPrice = p.salePrice;
+      });
+    }
+    if (!data.stockMovements) data.stockMovements = def.stockMovements || [];
+    return data;
+  }
+
+  function loadLocal() {
     try {
       var raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
-        state.data = JSON.parse(raw);
-        var def = defaultData();
-        ["payrollStructures", "employeePayroll", "payslips", "stockMovements"].forEach(function (k) {
-          if (!state.data[k]) state.data[k] = def[k];
-        });
-        state.data.products.forEach(function (p) {
-          if (!p.barcode) p.barcode = "8901234567" + String(890 + p.id).slice(-3);
-          if (p.mrp == null) p.mrp = p.unitPrice ? Math.round(p.unitPrice * 1.15) : 0;
-          if (p.salePrice == null) p.salePrice = p.unitPrice || 0;
-          if (p.discountPercent == null && p.mrp > 0) {
-            p.discountPercent = Math.round((1 - p.salePrice / p.mrp) * 1000) / 10;
-          }
-          p.unitPrice = p.salePrice;
-        });
-        if (!state.data.stockMovements) state.data.stockMovements = def.stockMovements || [];
+        state.data = migrateData(JSON.parse(raw));
       } else {
         state.data = defaultData();
       }
@@ -256,8 +262,15 @@
     }
   }
 
+  function load() {
+    loadLocal();
+  }
+
   function save() {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data)); } catch (e) {}
+    if (window.BizBuiltCloud && BizBuiltCloud.isConnected()) {
+      BizBuiltCloud.saveData(state.data);
+    }
   }
 
   function fmt(n) { return "₹" + Number(n).toLocaleString("en-IN"); }
@@ -1456,10 +1469,12 @@
       '<div class="bb-sidebar-foot"><a href="../bizbuilt-ai.html">← Product info</a><a href="../index.html">WorkPilot Tools</a></div></aside>' +
       '<div class="bb-main"><header class="bb-topbar">' +
       '<div style="display:flex;align-items:center;gap:12px"><button type="button" class="bb-menu-toggle" id="bb-menu-toggle">☰</button><h1>' + esc(TITLES[state.view]) + "</h1></div>" +
-      '<div class="bb-topbar-actions"><button type="button" class="wp-theme-toggle bb-btn">🌙</button>' +
+      '<div class="bb-topbar-actions"><div id="bb-cloud-auth"></div><button type="button" class="wp-theme-toggle bb-btn">🌙</button>' +
       '<a class="bb-btn" href="mailto:mml.products26@gmail.com?subject=BizBuilt%20AI%20Upgrade">Upgrade</a>' +
       '<button type="button" class="bb-btn" id="bb-reset-demo">Reset demo</button></div></header>' +
-      '<div class="bb-content" id="bb-view-content">' + fn() + "</div></div>";
+      '<div class="bb-content" id="bb-view-content">' +
+      (window.BizBuiltCloud && BizBuiltCloud.isEnabled() ? '<div id="bb-cloud-banner"></div>' : "") +
+      fn() + "</div></div>";
 
     root.querySelectorAll("[data-view]").forEach(function (btn) {
       btn.onclick = function () {
@@ -1481,10 +1496,41 @@
     initBarcodes();
     var msgs = document.getElementById("bb-chat-msgs");
     if (msgs) msgs.scrollTop = msgs.scrollHeight;
+
+    if (window.BizBuiltCloud && BizBuiltCloud.isEnabled()) {
+      BizBuiltCloud.renderBanner(document.getElementById("bb-cloud-banner"));
+      BizBuiltCloud.mountSignIn(document.getElementById("bb-cloud-auth"));
+    }
   }
 
-  load();
-  initTabDelegation();
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", render);
-  else render();
+  function applyCloudData(data) {
+    if (data && typeof data === "object") {
+      state.data = migrateData(data);
+      save();
+    } else {
+      loadLocal();
+    }
+    render();
+  }
+
+  window.BizBuiltApp = {
+    onCloudLogin: applyCloudData,
+  };
+
+  function bootstrap() {
+    initTabDelegation();
+    if (window.BizBuiltCloud && BizBuiltCloud.isEnabled()) {
+      BizBuiltCloud.init().then(function (cloudData) {
+        if (cloudData) state.data = migrateData(cloudData);
+        else loadLocal();
+        render();
+      });
+    } else {
+      loadLocal();
+      render();
+    }
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bootstrap);
+  else bootstrap();
 })();

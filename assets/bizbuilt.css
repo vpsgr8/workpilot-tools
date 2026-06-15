@@ -107,6 +107,40 @@ html[data-theme="dark"] .bb-pricing { background: #0f172a; border-color: #334155
 .bb-price-card ul { list-style: none; padding: 0; margin: 0 0 20px; text-align: left; font-size: 14px; }
 .bb-price-card li { padding: 6px 0; border-bottom: 1px solid #f1f5f9; }
 .bb-price-card li::before { content: "✓ "; color: #10b981; font-weight: 700; }
+.bb-price-card .amount span { font-size: 1rem; font-weight: 500; }
+.bb-tier-employees { margin: 0 0 4px; font-size: 13px; color: #64748b; font-weight: 600; }
+.bb-pricing-sub { text-align: center; color: #64748b; max-width: 620px; margin: -16px auto 24px; line-height: 1.55; }
+.bb-billing-toggle { display: flex; justify-content: center; gap: 8px; margin-bottom: 28px; flex-wrap: wrap; }
+.bb-billing-toggle button { padding: 10px 18px; border: 1px solid #e5e7eb; border-radius: 999px; background: #fff; font-size: 14px; font-weight: 600; cursor: pointer; color: #334155; }
+.bb-billing-toggle button.active { background: #6366f1; border-color: #6366f1; color: #fff; }
+.bb-billing-toggle button em { font-style: normal; font-size: 11px; opacity: 0.85; margin-left: 4px; }
+.bb-price-grid-4 { max-width: 1120px; margin: 0 auto; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.bb-pricing-foot { text-align: center; margin-top: 28px; color: #64748b; font-size: 14px; line-height: 1.6; }
+.bb-gcp-deploy { background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%); border-top: 1px solid #e5e7eb; padding: 56px 20px; }
+html[data-theme="dark"] .bb-gcp-deploy { background: linear-gradient(180deg, #0f172a 0%, #1e1b4b 100%); border-color: #334155; }
+.bb-gcp-inner { max-width: 960px; margin: 0 auto; text-align: center; }
+.bb-gcp-badge { display: inline-block; padding: 6px 14px; border-radius: 999px; background: #6366f1; color: #fff; font-size: 12px; font-weight: 700; letter-spacing: 0.03em; margin-bottom: 16px; }
+.bb-gcp-deploy h2 { margin: 0 0 12px; font-size: clamp(1.5rem, 3vw, 2rem); }
+.bb-gcp-lead { max-width: 720px; margin: 0 auto 32px; color: #475569; line-height: 1.65; font-size: 1.05rem; }
+html[data-theme="dark"] .bb-gcp-lead { color: #cbd5e1; }
+.bb-gcp-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 28px; text-align: left; }
+.bb-gcp-steps article { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; }
+html[data-theme="dark"] .bb-gcp-steps article { background: #1e293b; border-color: #334155; }
+.bb-gcp-steps span { display: inline-flex; width: 28px; height: 28px; align-items: center; justify-content: center; border-radius: 50%; background: #6366f1; color: #fff; font-weight: 700; font-size: 13px; margin-bottom: 10px; }
+.bb-gcp-steps h4 { margin: 0 0 6px; font-size: 15px; }
+.bb-gcp-steps p { margin: 0; font-size: 13px; color: #64748b; line-height: 1.5; }
+.bb-gcp-includes { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-bottom: 20px; text-align: left; font-size: 14px; }
+.bb-gcp-includes div { padding: 10px 14px; background: rgba(255,255,255,0.7); border-radius: 8px; border: 1px solid #e2e8f0; }
+html[data-theme="dark"] .bb-gcp-includes div { background: rgba(30,41,59,0.8); border-color: #334155; }
+.bb-gcp-note { font-size: 13px; color: #64748b; max-width: 680px; margin: 0 auto 24px; line-height: 1.55; }
+.bb-gcp-cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.bb-gcp-cta .bb-cta-primary { background: #6366f1; color: #fff; padding: 14px 24px; border-radius: 10px; font-weight: 700; text-decoration: none; }
+.bb-gcp-cta .bb-cta-secondary { background: #fff; color: #4f46e5; border: 1px solid #c7d2fe; padding: 14px 24px; border-radius: 10px; font-weight: 700; text-decoration: none; }
+.bb-cloud-banner { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 10px 14px; border-radius: 10px; background: var(--bb-accent-soft); border: 1px solid var(--bb-line); font-size: 13px; margin-bottom: 16px; }
+.bb-cloud-banner.ok { border-color: #86efac; background: #ecfdf5; }
+.bb-cloud-banner.warn { border-color: #fcd34d; background: #fffbeb; }
+.bb-cloud-user { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; }
+.bb-cloud-user img { width: 28px; height: 28px; border-radius: 50%; }
 .bb-home-premium { margin: 0 0 28px; padding: 28px; border-radius: 14px; background: linear-gradient(135deg, #0f172a 0%, #312e81 100%); color: #fff; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px; }
 .bb-home-premium h2 { margin: 0 0 8px; font-size: 1.5rem; color: #fff; }
 .bb-home-premium p { margin: 0; opacity: 0.9; max-width: 520px; line-height: 1.55; }

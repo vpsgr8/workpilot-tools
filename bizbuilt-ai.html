@@ -45,7 +45,7 @@
   <p>One login. One dashboard. Run CRM, HR, payroll, invoices, expenses, revenue, projects, inventory, marketing, support — and an AI Copilot that tells you exactly what to do next.</p>
   <div class="bb-landing-cta">
     <a class="bb-cta-primary" href="bizbuilt/index.html">Try live demo →</a>
-    <a class="bb-cta-secondary" href="mailto:mml.products26@gmail.com?subject=BizBuilt%20AI%20Premium%20Enquiry">Request access</a>
+    <a class="bb-cta-secondary" href="#deploy">Deploy on your GCP</a>
   </div>
 </section>
 
@@ -97,45 +97,93 @@
   </div>
 </section>
 
-<section class="bb-pricing">
+<section class="bb-gcp-deploy" id="deploy">
+  <div class="bb-gcp-inner">
+    <span class="bb-gcp-badge">Your cloud · Your domain · Your data</span>
+    <h2>Deploy BizBuilt on your Google Cloud</h2>
+    <p class="bb-gcp-lead">We install the full BizBuilt AI suite on <strong>your domain</strong> (e.g. <code>erp.yourcompany.com</code>) with all business data stored in <strong>your Google Cloud project</strong> — Mumbai region. You own the data; we handle setup, updates, and support.</p>
+    <div class="bb-gcp-steps">
+      <article><span>1</span><h4>Discovery call</h4><p>Team size, modules needed, billing cycle.</p></article>
+      <article><span>2</span><h4>Your GCP project</h4><p>Cloud SQL, Cloud Run, Storage — in your account.</p></article>
+      <article><span>3</span><h4>Custom domain</h4><p>SSL, Google Sign-In, employee access.</p></article>
+      <article><span>4</span><h4>Go live</h4><p>Training, data import, ongoing support.</p></article>
+    </div>
+    <div class="bb-gcp-includes">
+      <div><strong>✓</strong> Dedicated deployment on customer GCP</div>
+      <div><strong>✓</strong> Google Sign-In / Workspace login</div>
+      <div><strong>✓</strong> Daily automated backups in your project</div>
+      <div><strong>✓</strong> India data residency (asia-south1)</div>
+      <div><strong>✓</strong> Software updates &amp; support included</div>
+      <div><strong>✓</strong> Export your data anytime (CSV / API)</div>
+    </div>
+    <p class="bb-gcp-note">GCP infrastructure (~₹2,000–₹8,000/mo) is billed by Google directly to you. Our fee covers the BizBuilt software license, deployment, and support.</p>
+    <div class="bb-gcp-cta">
+      <a class="bb-cta-primary" href="mailto:mml.products26@gmail.com?subject=BizBuilt%20AI%20-%20Deploy%20on%20My%20GCP">Book deployment call</a>
+      <a class="bb-cta-secondary" href="bizbuilt-sales-one-pager.html" target="_blank" rel="noopener">Download sales one-pager (PDF)</a>
+    </div>
+  </div>
+</section>
+
+<section class="bb-pricing" id="pricing">
   <div class="bb-pricing-inner">
-    <h2>Simple pricing for growing SMEs</h2>
-    <div class="bb-price-grid">
-      <div class="bb-price-card">
+    <h2>Pricing by team size</h2>
+    <p class="bb-pricing-sub">Private deployment on your domain &amp; Google Cloud. Billed by active employees in your company.</p>
+    <div class="bb-billing-toggle" role="group" aria-label="Billing cycle">
+      <button type="button" class="active" data-cycle="monthly">Monthly</button>
+      <button type="button" data-cycle="quarterly">Quarterly <em>−8%</em></button>
+      <button type="button" data-cycle="yearly">Yearly <em>−15%</em></button>
+    </div>
+    <div class="bb-price-grid bb-price-grid-4">
+      <div class="bb-price-card" data-tier="starter">
         <h3>Starter</h3>
-        <div class="amount">₹999<span style="font-size:1rem;font-weight:500">/mo</span></div>
+        <p class="bb-tier-employees">1–10 employees</p>
+        <div class="amount" data-monthly="2999" data-quarterly="8249" data-yearly="30590">₹2,999<span>/mo</span></div>
         <ul>
-          <li>CRM + Invoices + Expenses</li>
-          <li>Revenue dashboard</li>
-          <li>Basic AI insights</li>
-          <li>Up to 5 users</li>
+          <li>Full BizBuilt AI suite (15+ modules)</li>
+          <li>CRM, invoices, inventory, HR, payroll</li>
+          <li>AI Copilot &amp; analytics</li>
+          <li>Deploy on your GCP + domain</li>
         </ul>
-        <a class="bb-btn bb-btn-primary" href="mailto:mml.products26@gmail.com?subject=BizBuilt%20AI%20Starter">Get Starter</a>
+        <a class="bb-btn bb-btn-primary" href="mailto:mml.products26@gmail.com?subject=BizBuilt%20Starter%20(1-10%20employees)">Get Starter</a>
       </div>
-      <div class="bb-price-card featured">
-        <h3>Pro</h3>
-        <div class="amount">₹2,499<span style="font-size:1rem;font-weight:500">/mo</span></div>
+      <div class="bb-price-card featured" data-tier="growth">
+        <h3>Growth</h3>
+        <p class="bb-tier-employees">11–50 employees</p>
+        <div class="amount" data-monthly="7999" data-quarterly="22037" data-yearly="81590">₹7,999<span>/mo</span></div>
         <ul>
-          <li>Full suite + AI Copilot</li>
-          <li>HR, Payroll, Finance</li>
-          <li>Analytics & forecasting</li>
-          <li>Up to 25 users</li>
+          <li>Everything in Starter</li>
+          <li>Barcode inventory &amp; procurement</li>
+          <li>Payroll structures &amp; payslips</li>
+          <li>Priority onboarding &amp; support</li>
         </ul>
-        <a class="bb-btn bb-btn-primary" href="mailto:mml.products26@gmail.com?subject=BizBuilt%20AI%20Pro">Get Pro</a>
+        <a class="bb-btn bb-btn-primary" href="mailto:mml.products26@gmail.com?subject=BizBuilt%20Growth%20(11-50%20employees)">Get Growth</a>
       </div>
-      <div class="bb-price-card">
+      <div class="bb-price-card" data-tier="business">
+        <h3>Business</h3>
+        <p class="bb-tier-employees">51–200 employees</p>
+        <div class="amount" data-monthly="19999" data-quarterly="55197" data-yearly="203890">₹19,999<span>/mo</span></div>
+        <ul>
+          <li>Everything in Growth</li>
+          <li>Multi-warehouse inventory</li>
+          <li>Advanced analytics &amp; forecasting</li>
+          <li>Dedicated success manager</li>
+        </ul>
+        <a class="bb-btn bb-btn-primary" href="mailto:mml.products26@gmail.com?subject=BizBuilt%20Business%20(51-200%20employees)">Get Business</a>
+      </div>
+      <div class="bb-price-card" data-tier="enterprise">
         <h3>Enterprise</h3>
-        <div class="amount">Custom</div>
+        <p class="bb-tier-employees">200+ employees</p>
+        <div class="amount enterprise-amount">Custom</div>
         <ul>
-          <li>Inventory + Procurement</li>
-          <li>Marketing + Support modules</li>
-          <li>API access & integrations</li>
-          <li>Unlimited users</li>
+          <li>Custom integrations &amp; API access</li>
+          <li>SLA &amp; on-site training</li>
+          <li>Multi-branch / multi-entity</li>
+          <li>Volume pricing</li>
         </ul>
-        <a class="bb-btn" href="mailto:mml.products26@gmail.com?subject=BizBuilt%20AI%20Enterprise">Contact sales</a>
+        <a class="bb-btn" href="mailto:mml.products26@gmail.com?subject=BizBuilt%20Enterprise%20(200%2B%20employees)">Contact sales</a>
       </div>
     </div>
-    <p style="text-align:center;margin-top:28px;color:#64748b;font-size:14px">Try the <a href="bizbuilt/index.html">live demo</a> free — no signup required.</p>
+    <p class="bb-pricing-foot">One-time setup &amp; deployment from <strong>₹15,000</strong> · <a href="bizbuilt/index.html">Try the free demo</a> (browser-only, no signup) · <a href="bizbuilt-sales-one-pager.html" target="_blank" rel="noopener">Sales one-pager PDF →</a></p>
   </div>
 </section>
 
@@ -145,6 +193,26 @@
   <a href="bizbuilt/index.html">Launch App</a>
   <a href="about.html">About Us</a>
   <a href="contact.html">Contact Us</a>
+  <a href="bizbuilt-sales-one-pager.html" target="_blank" rel="noopener">Sales PDF</a>
 </footer>
+<script>
+(function () {
+  var cycle = "monthly";
+  var labels = { monthly: "/mo", quarterly: "/qtr", yearly: "/yr" };
+  var toggle = document.querySelector(".bb-billing-toggle");
+  if (!toggle) return;
+  toggle.querySelectorAll("button").forEach(function (btn) {
+    btn.onclick = function () {
+      cycle = btn.getAttribute("data-cycle");
+      toggle.querySelectorAll("button").forEach(function (b) { b.classList.remove("active"); });
+      btn.classList.add("active");
+      document.querySelectorAll(".bb-price-card .amount[data-monthly]").forEach(function (el) {
+        var val = el.getAttribute("data-" + cycle);
+        el.innerHTML = "₹" + Number(val).toLocaleString("en-IN") + "<span>" + labels[cycle] + "</span>";
+      });
+    };
+  });
+})();
+</script>
 </body>
 </html>

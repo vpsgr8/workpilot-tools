@@ -1,0 +1,6 @@
+project_id      = "your-gcp-project-id"
+region          = "asia-south1"
+company_name    = "Acme Corp Pvt Ltd"
+allowed_domain  = "acmecorp.com"
+license_tier    = "growth"
+max_employees   = 50
