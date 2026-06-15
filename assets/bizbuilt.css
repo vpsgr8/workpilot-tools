@@ -433,3 +433,88 @@ html[data-theme="dark"] .bb-insight.info { background: #1e3a5f; border-color: #2
   color: #6366f1;
   margin-left: 8px;
 }
+
+.bb-barcode-scan {
+  border: 2px dashed var(--bb-accent);
+  background: var(--bb-accent-soft);
+}
+
+.bb-barcode-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.bb-barcode-chip {
+  padding: 8px 12px;
+  border: 1px solid var(--bb-line);
+  border-radius: 8px;
+  background: var(--bb-panel);
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--bb-ink);
+}
+
+.bb-barcode-chip:hover {
+  border-color: var(--bb-accent);
+  background: var(--bb-accent-soft);
+}
+
+.bb-stock-msg {
+  margin-top: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  min-height: 1.2em;
+}
+
+.bb-stock-msg.ok { color: #059669; }
+.bb-stock-msg.err { color: #dc2626; }
+
+#bb-barcode-input {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.bb-barcode-labels {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.bb-barcode-label {
+  background: var(--bb-panel);
+  border: 1px solid var(--bb-line);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+}
+
+.bb-barcode-label h4 {
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+
+.bb-barcode-meta {
+  margin: 0 0 12px;
+  font-size: 12px;
+  color: var(--bb-muted);
+}
+
+.bb-barcode-full {
+  max-width: 100%;
+  height: auto;
+}
+
+.bb-barcode-mini {
+  max-width: 120px;
+  height: 36px;
+}
+
+.bb-barcode-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}

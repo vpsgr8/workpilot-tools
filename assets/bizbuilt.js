@@ -13,6 +13,7 @@
     var fn = RENDERERS[state.view] || renderDashboard;
     el.innerHTML = fn();
     bindForms();
+    initBarcodes();
   }
 
   var PIPELINE = [
@@ -179,9 +180,15 @@
         { id: 3, projectId: 2, title: "API documentation", assignee: "Vikram Patel", due: "2026-06-18", done: false },
       ],
       products: [
-        { id: 1, sku: "PRD-001", name: "Premium Widget", stock: 45, reorder: 20, warehouse: "Main" },
-        { id: 2, sku: "PRD-002", name: "Standard Kit", stock: 8, reorder: 15, warehouse: "Main" },
-        { id: 3, sku: "PRD-003", name: "Service Pack A", stock: 120, reorder: 30, warehouse: "East" },
+        { id: 1, sku: "PRD-001", barcode: "8901234567890", name: "Premium Widget", stock: 45, reorder: 20, warehouse: "Main", unitPrice: 1299 },
+        { id: 2, sku: "PRD-002", barcode: "8901234567891", name: "Standard Kit", stock: 8, reorder: 15, warehouse: "Main", unitPrice: 599 },
+        { id: 3, sku: "PRD-003", barcode: "8901234567892", name: "Service Pack A", stock: 120, reorder: 30, warehouse: "East", unitPrice: 249 },
+      ],
+      stockMovements: [
+        { id: 1, productId: 1, type: "in", qty: 50, method: "manual", ref: "PO-102", note: "SupplyCo delivery", date: "2026-06-01T10:30:00" },
+        { id: 2, productId: 1, type: "sale", qty: 5, method: "barcode", ref: "SALE-8841", note: "Bright Retail counter sale", date: "2026-06-10T14:22:00" },
+        { id: 3, productId: 2, type: "sale", qty: 2, method: "barcode", ref: "SALE-8842", note: "Walk-in customer", date: "2026-06-12T11:05:00" },
+        { id: 4, productId: 3, type: "out", qty: 10, method: "manual", ref: "ADJ-001", note: "Sample units sent", date: "2026-06-08T09:00:00" },
       ],
       vendors: [
         { id: 1, name: "SupplyCo India", contact: "Ravi", rating: 4.5, orders: 12 },
@@ -228,9 +235,14 @@
       if (raw) {
         state.data = JSON.parse(raw);
         var def = defaultData();
-        ["payrollStructures", "employeePayroll", "payslips"].forEach(function (k) {
+        ["payrollStructures", "employeePayroll", "payslips", "stockMovements"].forEach(function (k) {
           if (!state.data[k]) state.data[k] = def[k];
         });
+        state.data.products.forEach(function (p) {
+          if (!p.barcode) p.barcode = "8901234567" + String(890 + p.id).slice(-3);
+          if (p.unitPrice == null) p.unitPrice = 0;
+        });
+        if (!state.data.stockMovements) state.data.stockMovements = def.stockMovements || [];
       } else {
         state.data = defaultData();
       }
@@ -318,6 +330,133 @@
     a.download = "Payslip_" + emp.name.replace(/\s+/g, "_") + "_" + month + ".html";
     a.click();
     URL.revokeObjectURL(a.href);
+  }
+
+  function findProductByBarcode(code) {
+    if (!code) return null;
+    code = String(code).trim().toLowerCase();
+    return state.data.products.find(function (p) {
+      return (p.barcode && p.barcode.toLowerCase() === code) ||
+        (p.sku && p.sku.toLowerCase() === code) ||
+        String(p.id) === code;
+    }) || null;
+  }
+
+  function recordStockMovement(productId, type, qty, method, ref, note) {
+    state.data.stockMovements.unshift({
+      id: nextId(state.data.stockMovements),
+      productId: productId,
+      type: type,
+      qty: qty,
+      method: method || "manual",
+      ref: ref || "",
+      note: note || "",
+      date: new Date().toISOString(),
+    });
+  }
+
+  function adjustStock(productId, delta, type, method, ref, note) {
+    var product = state.data.products.find(function (p) { return p.id === productId; });
+    if (!product) return { ok: false, msg: "Product not found." };
+    if (delta < 0 && product.stock + delta < 0) {
+      return { ok: false, msg: "Insufficient stock for " + product.name + ". Available: " + product.stock };
+    }
+    product.stock += delta;
+    recordStockMovement(productId, type, Math.abs(delta), method, ref, note);
+    save();
+    return { ok: true, msg: product.name + " — stock now " + product.stock + " units.", product: product };
+  }
+
+  function processBarcodeSale(barcode, qty, ref, note) {
+    qty = Math.max(1, Number(qty) || 1);
+    var product = findProductByBarcode(barcode);
+    if (!product) return { ok: false, msg: "No product matched barcode: " + barcode };
+    return adjustStock(product.id, -qty, "sale", "barcode", ref || "SALE-" + Date.now(), note || "Barcode sale");
+  }
+
+  function generateBarcodeForSku(sku, id) {
+    var base = String(sku || "SKU").replace(/\W/g, "").toUpperCase();
+    var hash = base.split("").reduce(function (a, c) { return a + c.charCodeAt(0); }, id || 0);
+    return "890" + String(1000000000 + (hash % 999999999)).slice(-10);
+  }
+
+  function barcodeValue(product) {
+    return product.barcode || product.sku || String(product.id);
+  }
+
+  function initBarcodes() {
+    if (typeof JsBarcode === "undefined") return;
+    state.data.products.forEach(function (p) {
+      document.querySelectorAll("[data-barcode-for=\"" + p.id + "\"]").forEach(function (el) {
+        try {
+          JsBarcode(el, barcodeValue(p), {
+            format: "CODE128",
+            width: el.getAttribute("data-bc-width") ? Number(el.getAttribute("data-bc-width")) : 1.8,
+            height: el.getAttribute("data-bc-height") ? Number(el.getAttribute("data-bc-height")) : 48,
+            margin: 6,
+            fontSize: 11,
+            displayValue: true,
+          });
+        } catch (err) {}
+      });
+    });
+  }
+
+  function downloadBarcodeSvg(productId) {
+    var p = state.data.products.find(function (x) { return x.id === productId; });
+    if (!p) return;
+    var svg = document.querySelector('[data-barcode-for="' + productId + '"].bb-barcode-full');
+    if (!svg && typeof JsBarcode !== "undefined") {
+      svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      JsBarcode(svg, barcodeValue(p), { format: "CODE128", width: 2, height: 70, margin: 8, fontSize: 14, displayValue: true });
+    }
+    if (!svg) return;
+    var xml = new XMLSerializer().serializeToString(svg);
+    var blob = new Blob([xml], { type: "image/svg+xml" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "Barcode_" + (p.sku || p.id) + ".svg";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function printBarcodeLabel(productId) {
+    var p = state.data.products.find(function (x) { return x.id === productId; });
+    if (!p || typeof JsBarcode === "undefined") return;
+    var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    JsBarcode(svg, barcodeValue(p), { format: "CODE128", width: 2.2, height: 80, margin: 10, fontSize: 14, displayValue: true });
+    var xml = new XMLSerializer().serializeToString(svg);
+    var win = window.open("", "_blank");
+    if (!win) return;
+    win.document.write(
+      "<!DOCTYPE html><html><head><title>Label " + esc(p.sku) + "</title>" +
+      "<style>body{font-family:Arial,sans-serif;text-align:center;padding:24px}h2{margin:0 0 8px;font-size:16px}.meta{font-size:12px;color:#555;margin-top:8px}</style></head><body>" +
+      "<h2>" + esc(p.name) + "</h2><p class=\"meta\">SKU: " + esc(p.sku) + " · " + fmt(p.unitPrice || 0) + "</p>" +
+      xml + "<script>window.onload=function(){window.print()}<\/script></body></html>"
+    );
+    win.document.close();
+  }
+
+  function renderBarcodeLabelsGrid() {
+    return '<div class="bb-barcode-labels">' + state.data.products.map(function (p) {
+      return (
+        '<div class="bb-barcode-label">' +
+        "<h4>" + esc(p.name) + "</h4>" +
+        '<p class="bb-barcode-meta">SKU: <strong>' + esc(p.sku) + "</strong> · Code: " + esc(p.barcode || barcodeValue(p)) + "</p>" +
+        '<svg class="bb-barcode-full" data-barcode-for="' + p.id + '" data-bc-width="2" data-bc-height="64"></svg>' +
+        '<div class="bb-barcode-actions">' +
+        '<button type="button" class="bb-btn" data-download-barcode="' + p.id + '">⬇ Download</button>' +
+        '<button type="button" class="bb-btn bb-btn-primary" data-print-barcode="' + p.id + '">🖨 Print Label</button>' +
+        "</div></div>"
+      );
+    }).join("") + "</div>";
+  }
+
+  function movementLabel(type) {
+    if (type === "sale") return "Sale (out)";
+    if (type === "in") return "Stock In";
+    if (type === "out") return "Stock Out";
+    return type;
   }
 
   function kpis() {
@@ -773,11 +912,110 @@
   }
 
   function renderInventory() {
-    return '<div class="bb-card"><h2>Product Catalog <span class="bb-pro-tag">AI Reorder</span></h2><div class="bb-table-wrap"><table class="bb-table"><thead><tr><th>SKU</th><th>Product</th><th>Stock</th><th>Reorder At</th><th>Warehouse</th><th>Alert</th></tr></thead><tbody>' +
+    var tab = getTab("inventory", "catalog");
+    var head = tabs([
+      { id: "catalog", label: "Product Catalog" },
+      { id: "barcodes", label: "Barcode Generator" },
+      { id: "barcode", label: "Barcode Sale" },
+      { id: "stock", label: "Stock In / Out" },
+      { id: "history", label: "Movement Log" },
+    ], tab);
+
+    var lowCount = state.data.products.filter(function (p) { return p.stock <= p.reorder; }).length;
+    var summary = '<div class="bb-kpi-grid">' +
+      '<div class="bb-kpi"><label>Total SKUs</label><strong>' + state.data.products.length + "</strong></div>" +
+      '<div class="bb-kpi"><label>Total Units in Stock</label><strong>' + state.data.products.reduce(function (t, p) { return t + p.stock; }, 0) + "</strong></div>" +
+      '<div class="bb-kpi"><label>Low Stock Alerts</label><strong class="' + (lowCount ? "bb-score-low" : "bb-score-high") + '">' + lowCount + "</strong></div></div>";
+
+    if (tab === "barcodes") {
+      return head + summary +
+        '<div class="bb-card"><h2>Barcode Generator — one label per SKU</h2>' +
+        "<p style=\"color:var(--bb-muted);font-size:13px;margin:0 0 16px\">Generate printable CODE128 barcodes for every product. Stick labels on stock — scan them in <strong>Barcode Sale</strong> to auto-deduct inventory.</p>" +
+        '<button type="button" class="bb-btn bb-btn-primary" id="bb-print-all-barcodes">🖨 Print All Labels</button></div>' +
+        renderBarcodeLabelsGrid();
+    }
+
+    if (tab === "barcode") {
+      return head + summary +
+        '<div class="bb-card bb-barcode-scan">' +
+        "<h2>📷 Scan Barcode to Sell</h2>" +
+        "<p style=\"color:var(--bb-muted);font-size:13px;margin:0 0 16px\">Stick a barcode on each product. Scan with a USB/barcode gun (or type the code) — stock deducts automatically by quantity sold.</p>" +
+        '<form id="bb-form-barcode-sale" class="bb-form-grid">' +
+        '<label>Barcode / SKU<input name="barcode" id="bb-barcode-input" required placeholder="Scan or type barcode…" autocomplete="off" autofocus></label>' +
+        '<label>Qty Sold<input name="qty" type="number" min="1" value="1" id="bb-barcode-qty"></label>' +
+        '<label>Sale Ref (optional)<input name="ref" placeholder="Invoice / receipt no."></label>' +
+        '<label>Note<input name="note" placeholder="Customer name, etc."></label>' +
+        '</form><button type="submit" form="bb-form-barcode-sale" class="bb-btn bb-btn-primary">Complete Sale & Deduct Stock</button>' +
+        '<p id="bb-barcode-msg" class="bb-stock-msg" role="status" aria-live="polite"></p>' +
+        "<h3 style=\"margin:24px 0 12px;font-size:14px\">Demo barcodes to try</h3>" +
+        '<div class="bb-barcode-chips">' +
+        state.data.products.map(function (p) {
+          return '<button type="button" class="bb-barcode-chip" data-fill-barcode="' + esc(p.barcode) + '">' + esc(p.name) + " · " + esc(p.barcode) + "</button>";
+        }).join("") +
+        "</div></div>" +
+        '<div class="bb-card"><h2>Live Stock After Sales</h2>' + renderProductTable(true) + "</div>";
+    }
+
+    if (tab === "stock") {
+      return head + summary +
+        '<div class="bb-card"><h2>Manual Stock Adjustment</h2>' +
+        "<p style=\"color:var(--bb-muted);font-size:13px;margin:0 0 16px\">Receive new stock, return goods, or adjust counts without a sale.</p>" +
+        '<form id="bb-form-stock-move" class="bb-form-grid">' +
+        '<label>Product<select name="productId" required>' + state.data.products.map(function (p) {
+          return '<option value="' + p.id + '">' + esc(p.name) + " (" + p.stock + " in stock)</option>";
+        }).join("") + "</select></label>" +
+        '<label>Or Barcode<input name="barcodeAlt" placeholder="Optional — overrides product select"></label>' +
+        '<label>Movement<select name="direction" required><option value="in">Stock In (+)</option><option value="out">Stock Out (−)</option></select></label>' +
+        '<label>Quantity<input name="qty" type="number" min="1" value="1" required></label>' +
+        '<label>Reference<input name="ref" placeholder="PO no., return ref…"></label>' +
+        '<label>Note<input name="note" placeholder="Reason for adjustment"></label>' +
+        '</form><button type="submit" form="bb-form-stock-move" class="bb-btn bb-btn-primary">Update Stock</button>' +
+        '<p id="bb-stock-msg" class="bb-stock-msg" role="status"></p></div>' +
+        '<div class="bb-card"><h2>Current Levels</h2>' + renderProductTable(true) + "</div>";
+    }
+
+    if (tab === "history") {
+      return head + summary +
+        '<div class="bb-card"><h2>Stock Movement Log</h2><div class="bb-table-wrap"><table class="bb-table"><thead><tr><th>Date</th><th>Product</th><th>Type</th><th>Qty</th><th>Method</th><th>Ref</th><th>Note</th></tr></thead><tbody>' +
+        state.data.stockMovements.map(function (m) {
+          var p = state.data.products.find(function (x) { return x.id === m.productId; });
+          var typeCls = m.type === "sale" || m.type === "out" ? "bb-score-low" : "bb-score-high";
+          return "<tr><td>" + esc(m.date.slice(0, 16).replace("T", " ")) + "</td><td>" + esc(p ? p.name : "—") + '</td><td class="' + typeCls + '">' + esc(movementLabel(m.type)) + "</td><td>" + m.qty + "</td><td><span class=\"bb-tag\">" + esc(m.method) + "</span></td><td>" + esc(m.ref) + "</td><td>" + esc(m.note) + "</td></tr>";
+        }).join("") + "</tbody></table></div></div>";
+    }
+
+    return head + summary +
+      '<div class="bb-card"><h2>Add Product with Barcode</h2>' +
+      '<form id="bb-form-product" class="bb-form-grid">' +
+      '<label>Product Name<input name="name" required></label>' +
+      '<label>SKU<input name="sku" required placeholder="PRD-004"></label>' +
+      '<label>Barcode<input name="barcode" placeholder="Auto-generated if empty"></label>' +
+      '<label>Opening Stock<input name="stock" type="number" min="0" value="0"></label>' +
+      '<label>Reorder Level<input name="reorder" type="number" min="0" value="10"></label>' +
+      '<label>Warehouse<input name="warehouse" value="Main"></label>' +
+      '<label>Unit Price (₹)<input name="unitPrice" type="number" min="0"></label>' +
+      '</form><button type="submit" form="bb-form-product" class="bb-btn bb-btn-primary">Add Product</button></div>' +
+      '<div class="bb-card"><h2>Product Catalog <span class="bb-pro-tag">Barcode tracked</span></h2>' + renderProductTable(true) + "</div>" +
+      '<div class="bb-card"><h2>Quick Barcode Preview</h2>' + renderBarcodeLabelsGrid();
+  }
+
+  function renderProductTable(showBarcode) {
+    return '<div class="bb-table-wrap"><table class="bb-table"><thead><tr><th>SKU</th>' +
+      (showBarcode ? "<th>Barcode</th><th>Scan Code</th>" : "") +
+      "<th>Product</th><th>Stock</th><th>Reorder</th><th>Price</th><th>Warehouse</th><th>Status</th>" +
+      (showBarcode ? "<th>Label</th>" : "") +
+      "</tr></thead><tbody>" +
       state.data.products.map(function (p) {
         var low = p.stock <= p.reorder;
-        return "<tr><td>" + esc(p.sku) + "</td><td>" + esc(p.name) + "</td><td>" + p.stock + "</td><td>" + p.reorder + "</td><td>" + esc(p.warehouse) + "</td><td>" + (low ? '<span class="bb-score-low">Low stock</span>' : "OK") + "</td></tr>";
-      }).join("") + "</tbody></table></div></div>";
+        return "<tr><td>" + esc(p.sku) + "</td>" +
+          (showBarcode ? "<td><code style=\"font-size:11px\">" + esc(p.barcode || "—") + "</code></td>" +
+          '<td><svg class="bb-barcode-mini" data-barcode-for="' + p.id + '" data-bc-width="1.2" data-bc-height="32"></svg></td>' : "") +
+          "<td>" + esc(p.name) + "</td><td><strong>" + p.stock + "</strong></td><td>" + p.reorder + "</td><td>" + fmt(p.unitPrice || 0) + "</td><td>" + esc(p.warehouse) + "</td><td>" +
+          (low ? '<span class="bb-score-low">Low stock</span>' : '<span class="bb-score-high">OK</span>') + "</td>" +
+          (showBarcode ? '<td><button type="button" class="bb-btn" data-download-barcode="' + p.id + '" title="Download">⬇</button> ' +
+          '<button type="button" class="bb-btn" data-print-barcode="' + p.id + '" title="Print">🖨</button></td>' : "") +
+          "</tr>";
+      }).join("") + "</tbody></table></div>";
   }
 
   function renderProcurement() {
@@ -1012,6 +1250,100 @@
       state.docQuery = docSearch.value;
       refreshView();
     };
+
+    var productForm = document.getElementById("bb-form-product");
+    if (productForm) productForm.onsubmit = function (e) {
+      e.preventDefault();
+      var fd = new FormData(productForm);
+      var id = nextId(state.data.products);
+      var sku = fd.get("sku");
+      var barcode = (fd.get("barcode") || "").trim() || generateBarcodeForSku(sku, id);
+      state.data.products.push({
+        id: id, name: fd.get("name"), sku: sku, barcode: barcode,
+        stock: Number(fd.get("stock")) || 0, reorder: Number(fd.get("reorder")) || 10,
+        warehouse: fd.get("warehouse") || "Main", unitPrice: Number(fd.get("unitPrice")) || 0,
+      });
+      if (Number(fd.get("stock")) > 0) {
+        recordStockMovement(id, "in", Number(fd.get("stock")), "manual", "OPENING", "Opening stock");
+      }
+      save(); refreshView();
+    };
+
+    var barcodeForm = document.getElementById("bb-form-barcode-sale");
+    if (barcodeForm) {
+      barcodeForm.onsubmit = function (e) {
+        e.preventDefault();
+        var fd = new FormData(barcodeForm);
+        var result = processBarcodeSale(fd.get("barcode"), fd.get("qty"), fd.get("ref"), fd.get("note"));
+        var msgEl = document.getElementById("bb-barcode-msg");
+        if (msgEl) {
+          msgEl.textContent = result.msg;
+          msgEl.className = "bb-stock-msg " + (result.ok ? "ok" : "err");
+        }
+        if (result.ok) {
+          barcodeForm.reset();
+          var qtyInput = document.getElementById("bb-barcode-qty");
+          if (qtyInput) qtyInput.value = "1";
+          var bcInput = document.getElementById("bb-barcode-input");
+          if (bcInput) bcInput.focus();
+          refreshView();
+        }
+      };
+      var bcInput = document.getElementById("bb-barcode-input");
+      if (bcInput) {
+        bcInput.onkeydown = function (ev) {
+          if (ev.key === "Enter" && !ev.shiftKey) {
+            ev.preventDefault();
+            barcodeForm.requestSubmit();
+          }
+        };
+      }
+    }
+
+    document.querySelectorAll("[data-fill-barcode]").forEach(function (btn) {
+      btn.onclick = function () {
+        var input = document.getElementById("bb-barcode-input");
+        if (input) {
+          input.value = btn.getAttribute("data-fill-barcode");
+          input.focus();
+        }
+      };
+    });
+
+    var stockForm = document.getElementById("bb-form-stock-move");
+    if (stockForm) stockForm.onsubmit = function (e) {
+      e.preventDefault();
+      var fd = new FormData(stockForm);
+      var qty = Number(fd.get("qty")) || 1;
+      var product = fd.get("barcodeAlt") ? findProductByBarcode(fd.get("barcodeAlt")) : state.data.products.find(function (p) { return p.id === Number(fd.get("productId")); });
+      var msgEl = document.getElementById("bb-stock-msg");
+      if (!product) {
+        if (msgEl) { msgEl.textContent = "Product not found."; msgEl.className = "bb-stock-msg err"; }
+        return;
+      }
+      var dir = fd.get("direction");
+      var result = adjustStock(product.id, dir === "in" ? qty : -qty, dir === "in" ? "in" : "out", "manual", fd.get("ref"), fd.get("note"));
+      if (msgEl) {
+        msgEl.textContent = result.msg;
+        msgEl.className = "bb-stock-msg " + (result.ok ? "ok" : "err");
+      }
+      if (result.ok) { stockForm.reset(); refreshView(); }
+    };
+
+    document.querySelectorAll("[data-download-barcode]").forEach(function (btn) {
+      btn.onclick = function () { downloadBarcodeSvg(Number(btn.getAttribute("data-download-barcode"))); };
+    });
+
+    document.querySelectorAll("[data-print-barcode]").forEach(function (btn) {
+      btn.onclick = function () { printBarcodeLabel(Number(btn.getAttribute("data-print-barcode"))); };
+    });
+
+    var printAll = document.getElementById("bb-print-all-barcodes");
+    if (printAll) printAll.onclick = function () {
+      state.data.products.forEach(function (p, i) {
+        setTimeout(function () { printBarcodeLabel(p.id); }, i * 400);
+      });
+    };
   }
 
   var tabDelegationReady = false;
@@ -1069,6 +1401,7 @@
     };
 
     bindForms();
+    initBarcodes();
     var msgs = document.getElementById("bb-chat-msgs");
     if (msgs) msgs.scrollTop = msgs.scrollHeight;
   }
