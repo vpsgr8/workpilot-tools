@@ -180,9 +180,9 @@
         { id: 3, projectId: 2, title: "API documentation", assignee: "Vikram Patel", due: "2026-06-18", done: false },
       ],
       products: [
-        { id: 1, sku: "PRD-001", barcode: "8901234567890", name: "Premium Widget", stock: 45, reorder: 20, warehouse: "Main", unitPrice: 1299 },
-        { id: 2, sku: "PRD-002", barcode: "8901234567891", name: "Standard Kit", stock: 8, reorder: 15, warehouse: "Main", unitPrice: 599 },
-        { id: 3, sku: "PRD-003", barcode: "8901234567892", name: "Service Pack A", stock: 120, reorder: 30, warehouse: "East", unitPrice: 249 },
+        { id: 1, sku: "PRD-001", barcode: "8901234567890", name: "Premium Widget", stock: 45, reorder: 20, warehouse: "Main", mrp: 1499, salePrice: 1299, discountPercent: 13.3, unitPrice: 1299 },
+        { id: 2, sku: "PRD-002", barcode: "8901234567891", name: "Standard Kit", stock: 8, reorder: 15, warehouse: "Main", mrp: 799, salePrice: 599, discountPercent: 25, unitPrice: 599 },
+        { id: 3, sku: "PRD-003", barcode: "8901234567892", name: "Service Pack A", stock: 120, reorder: 30, warehouse: "East", mrp: 299, salePrice: 249, discountPercent: 16.7, unitPrice: 249 },
       ],
       stockMovements: [
         { id: 1, productId: 1, type: "in", qty: 50, method: "manual", ref: "PO-102", note: "SupplyCo delivery", date: "2026-06-01T10:30:00" },
@@ -240,7 +240,12 @@
         });
         state.data.products.forEach(function (p) {
           if (!p.barcode) p.barcode = "8901234567" + String(890 + p.id).slice(-3);
-          if (p.unitPrice == null) p.unitPrice = 0;
+          if (p.mrp == null) p.mrp = p.unitPrice ? Math.round(p.unitPrice * 1.15) : 0;
+          if (p.salePrice == null) p.salePrice = p.unitPrice || 0;
+          if (p.discountPercent == null && p.mrp > 0) {
+            p.discountPercent = Math.round((1 - p.salePrice / p.mrp) * 1000) / 10;
+          }
+          p.unitPrice = p.salePrice;
         });
         if (!state.data.stockMovements) state.data.stockMovements = def.stockMovements || [];
       } else {
@@ -374,6 +379,24 @@
     return adjustStock(product.id, -qty, "sale", "barcode", ref || "SALE-" + Date.now(), note || "Barcode sale");
   }
 
+  function calcSaleFromDiscount(mrp, discountPercent) {
+    mrp = Number(mrp) || 0;
+    discountPercent = Number(discountPercent) || 0;
+    if (!mrp) return 0;
+    return Math.round(mrp * (1 - Math.min(Math.max(discountPercent, 0), 100) / 100));
+  }
+
+  function calcDiscountFromPrices(mrp, salePrice) {
+    mrp = Number(mrp) || 0;
+    salePrice = Number(salePrice) || 0;
+    if (!mrp || salePrice > mrp) return 0;
+    return Math.round((1 - salePrice / mrp) * 1000) / 10;
+  }
+
+  function productSalePrice(p) {
+    return p.salePrice != null ? p.salePrice : (p.unitPrice || 0);
+  }
+
   function generateBarcodeForSku(sku, id) {
     var base = String(sku || "SKU").replace(/\W/g, "").toUpperCase();
     var hash = base.split("").reduce(function (a, c) { return a + c.charCodeAt(0); }, id || 0);
@@ -431,7 +454,7 @@
     win.document.write(
       "<!DOCTYPE html><html><head><title>Label " + esc(p.sku) + "</title>" +
       "<style>body{font-family:Arial,sans-serif;text-align:center;padding:24px}h2{margin:0 0 8px;font-size:16px}.meta{font-size:12px;color:#555;margin-top:8px}</style></head><body>" +
-      "<h2>" + esc(p.name) + "</h2><p class=\"meta\">SKU: " + esc(p.sku) + " · " + fmt(p.unitPrice || 0) + "</p>" +
+      "<h2>" + esc(p.name) + "</h2><p class=\"meta\">SKU: " + esc(p.sku) + " · MRP " + fmt(p.mrp || 0) + " · Sale " + fmt(productSalePrice(p)) + "</p>" +
       xml + "<script>window.onload=function(){window.print()}<\/script></body></html>"
     );
     win.document.close();
@@ -442,7 +465,7 @@
       return (
         '<div class="bb-barcode-label">' +
         "<h4>" + esc(p.name) + "</h4>" +
-        '<p class="bb-barcode-meta">SKU: <strong>' + esc(p.sku) + "</strong> · Code: " + esc(p.barcode || barcodeValue(p)) + "</p>" +
+        '<p class="bb-barcode-meta">SKU: <strong>' + esc(p.sku) + "</strong> · MRP " + fmt(p.mrp || 0) + " · Sale " + fmt(productSalePrice(p)) + "</p>" +
         '<svg class="bb-barcode-full" data-barcode-for="' + p.id + '" data-bc-width="2" data-bc-height="64"></svg>' +
         '<div class="bb-barcode-actions">' +
         '<button type="button" class="bb-btn" data-download-barcode="' + p.id + '">⬇ Download</button>' +
@@ -993,7 +1016,10 @@
       '<label>Opening Stock<input name="stock" type="number" min="0" value="0"></label>' +
       '<label>Reorder Level<input name="reorder" type="number" min="0" value="10"></label>' +
       '<label>Warehouse<input name="warehouse" value="Main"></label>' +
-      '<label>Unit Price (₹)<input name="unitPrice" type="number" min="0"></label>' +
+      '<label>MRP (₹)<input name="mrp" id="bb-prod-mrp" type="number" min="0" step="0.01" placeholder="Maximum retail price"></label>' +
+      '<label>Discount %<input name="discountPercent" id="bb-prod-discount" type="number" min="0" max="100" step="0.1" placeholder="e.g. 15"></label>' +
+      '<label>Sale Price (₹)<input name="salePrice" id="bb-prod-sale" type="number" min="0" step="0.01" placeholder="Manual or auto from discount"></label>' +
+      '<p id="bb-price-preview" class="bb-price-preview">Enter MRP and either discount % or sale price.</p>' +
       '</form><button type="submit" form="bb-form-product" class="bb-btn bb-btn-primary">Add Product</button></div>' +
       '<div class="bb-card"><h2>Product Catalog <span class="bb-pro-tag">Barcode tracked</span></h2>' + renderProductTable(true) + "</div>" +
       '<div class="bb-card"><h2>Quick Barcode Preview</h2>' + renderBarcodeLabelsGrid();
@@ -1002,7 +1028,7 @@
   function renderProductTable(showBarcode) {
     return '<div class="bb-table-wrap"><table class="bb-table"><thead><tr><th>SKU</th>' +
       (showBarcode ? "<th>Barcode</th><th>Scan Code</th>" : "") +
-      "<th>Product</th><th>Stock</th><th>Reorder</th><th>Price</th><th>Warehouse</th><th>Status</th>" +
+      "<th>Product</th><th>Stock</th><th>Reorder</th><th>MRP</th><th>Discount</th><th>Sale Price</th><th>Warehouse</th><th>Status</th>" +
       (showBarcode ? "<th>Label</th>" : "") +
       "</tr></thead><tbody>" +
       state.data.products.map(function (p) {
@@ -1010,7 +1036,9 @@
         return "<tr><td>" + esc(p.sku) + "</td>" +
           (showBarcode ? "<td><code style=\"font-size:11px\">" + esc(p.barcode || "—") + "</code></td>" +
           '<td><svg class="bb-barcode-mini" data-barcode-for="' + p.id + '" data-bc-width="1.2" data-bc-height="32"></svg></td>' : "") +
-          "<td>" + esc(p.name) + "</td><td><strong>" + p.stock + "</strong></td><td>" + p.reorder + "</td><td>" + fmt(p.unitPrice || 0) + "</td><td>" + esc(p.warehouse) + "</td><td>" +
+          "<td>" + esc(p.name) + "</td><td><strong>" + p.stock + "</strong></td><td>" + p.reorder + "</td>" +
+          "<td>" + fmt(p.mrp || 0) + "</td><td>" + (p.discountPercent ? p.discountPercent + "%" : "—") + "</td>" +
+          '<td><strong>' + fmt(productSalePrice(p)) + "</strong></td><td>" + esc(p.warehouse) + "</td><td>" +
           (low ? '<span class="bb-score-low">Low stock</span>' : '<span class="bb-score-high">OK</span>') + "</td>" +
           (showBarcode ? '<td><button type="button" class="bb-btn" data-download-barcode="' + p.id + '" title="Download">⬇</button> ' +
           '<button type="button" class="bb-btn" data-print-barcode="' + p.id + '" title="Print">🖨</button></td>' : "") +
@@ -1252,22 +1280,71 @@
     };
 
     var productForm = document.getElementById("bb-form-product");
-    if (productForm) productForm.onsubmit = function (e) {
-      e.preventDefault();
-      var fd = new FormData(productForm);
-      var id = nextId(state.data.products);
-      var sku = fd.get("sku");
-      var barcode = (fd.get("barcode") || "").trim() || generateBarcodeForSku(sku, id);
-      state.data.products.push({
-        id: id, name: fd.get("name"), sku: sku, barcode: barcode,
-        stock: Number(fd.get("stock")) || 0, reorder: Number(fd.get("reorder")) || 10,
-        warehouse: fd.get("warehouse") || "Main", unitPrice: Number(fd.get("unitPrice")) || 0,
-      });
-      if (Number(fd.get("stock")) > 0) {
-        recordStockMovement(id, "in", Number(fd.get("stock")), "manual", "OPENING", "Opening stock");
+    if (productForm) {
+      var mrpInput = document.getElementById("bb-prod-mrp");
+      var discountInput = document.getElementById("bb-prod-discount");
+      var saleInput = document.getElementById("bb-prod-sale");
+      var preview = document.getElementById("bb-price-preview");
+      var priceLock = "";
+
+      function updatePricePreview(from) {
+        if (!mrpInput || !discountInput || !saleInput) return;
+        var mrp = Number(mrpInput.value) || 0;
+        if (from === "discount") {
+          priceLock = "discount";
+          var sale = calcSaleFromDiscount(mrp, discountInput.value);
+          saleInput.value = sale || "";
+        } else if (from === "sale") {
+          priceLock = "sale";
+          discountInput.value = calcDiscountFromPrices(mrp, saleInput.value) || "";
+        } else if (from === "mrp") {
+          if (priceLock === "discount" && discountInput.value) {
+            saleInput.value = calcSaleFromDiscount(mrp, discountInput.value) || "";
+          } else if (priceLock === "sale" && saleInput.value) {
+            discountInput.value = calcDiscountFromPrices(mrp, saleInput.value) || "";
+          } else if (discountInput.value) {
+            saleInput.value = calcSaleFromDiscount(mrp, discountInput.value) || "";
+          } else if (saleInput.value) {
+            discountInput.value = calcDiscountFromPrices(mrp, saleInput.value) || "";
+          }
+        }
+        if (preview) {
+          var sp = Number(saleInput.value) || calcSaleFromDiscount(mrp, discountInput.value);
+          var disc = Number(discountInput.value) || calcDiscountFromPrices(mrp, sp);
+          preview.textContent = mrp
+            ? "MRP " + fmt(mrp) + " · " + (disc ? disc + "% off" : "No discount") + " · Sale " + fmt(sp)
+            : "Enter MRP and either discount % or sale price.";
+        }
       }
-      save(); refreshView();
-    };
+
+      if (mrpInput) mrpInput.oninput = function () { updatePricePreview("mrp"); };
+      if (discountInput) discountInput.oninput = function () { updatePricePreview("discount"); };
+      if (saleInput) saleInput.oninput = function () { updatePricePreview("sale"); };
+
+      productForm.onsubmit = function (e) {
+        e.preventDefault();
+        var fd = new FormData(productForm);
+        var id = nextId(state.data.products);
+        var sku = fd.get("sku");
+        var barcode = (fd.get("barcode") || "").trim() || generateBarcodeForSku(sku, id);
+        var mrp = Number(fd.get("mrp")) || 0;
+        var discountPercent = Number(fd.get("discountPercent")) || 0;
+        var salePrice = Number(fd.get("salePrice")) || 0;
+        if (!salePrice && mrp && discountPercent) salePrice = calcSaleFromDiscount(mrp, discountPercent);
+        if (!discountPercent && mrp && salePrice) discountPercent = calcDiscountFromPrices(mrp, salePrice);
+        if (!salePrice && mrp) salePrice = mrp;
+        state.data.products.push({
+          id: id, name: fd.get("name"), sku: sku, barcode: barcode,
+          stock: Number(fd.get("stock")) || 0, reorder: Number(fd.get("reorder")) || 10,
+          warehouse: fd.get("warehouse") || "Main",
+          mrp: mrp, salePrice: salePrice, discountPercent: discountPercent, unitPrice: salePrice,
+        });
+        if (Number(fd.get("stock")) > 0) {
+          recordStockMovement(id, "in", Number(fd.get("stock")), "manual", "OPENING", "Opening stock");
+        }
+        save(); refreshView();
+      };
+    }
 
     var barcodeForm = document.getElementById("bb-form-barcode-sale");
     if (barcodeForm) {

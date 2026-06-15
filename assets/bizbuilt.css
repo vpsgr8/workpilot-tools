@@ -518,3 +518,14 @@ html[data-theme="dark"] .bb-insight.info { background: #1e3a5f; border-color: #2
   margin-top: 12px;
   flex-wrap: wrap;
 }
+
+.bb-price-preview {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--bb-accent-soft);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--bb-ink);
+}
