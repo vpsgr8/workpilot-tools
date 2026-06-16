@@ -166,20 +166,25 @@ app.get("/api/me", auth.authMiddleware, async function (req, res) {
 
 async function start() {
   if (!process.env.JWT_SECRET) {
-    console.warn("Warning: JWT_SECRET not set — auth will fail until configured.");
+    console.warn("Warning: JWT_SECRET not set — BizBuilt auth disabled until configured.");
   }
   if (!razorpay.isConfigured()) {
     console.warn("Warning: RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET not set — payments disabled.");
   }
   if (process.env.DATABASE_URL) {
-    await db.initSchema();
-    await db.ensureDefaultCompany();
+    try {
+      await db.initSchema();
+      await db.ensureDefaultCompany();
+      console.log("Database connected.");
+    } catch (e) {
+      console.warn("Database unavailable — running payments-only:", e.message);
+    }
   } else {
-    console.warn("DATABASE_URL not set — running without BizBuilt cloud DB (payments only).");
+    console.log("Payments-only mode (no DATABASE_URL).");
   }
 
   app.listen(PORT, function () {
-    console.log("BizBuilt API listening on port " + PORT);
+    console.log("WorkPilot API listening on port " + PORT);
   });
 }
 
