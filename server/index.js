@@ -7,6 +7,7 @@ const cors = require("cors");
 const path = require("path");
 const db = require("./db");
 const auth = require("./auth");
+const razorpay = require("./razorpay");
 
 const app = express();
 const PORT = Number(process.env.PORT) || 8080;
@@ -86,6 +87,65 @@ app.put("/api/data", auth.authMiddleware, async function (req, res) {
   }
 });
 
+app.get("/api/payments/config", function (_req, res) {
+  res.json(razorpay.getPublicConfig());
+});
+
+app.post("/api/payments/order", async function (req, res) {
+  try {
+    if (!razorpay.isConfigured()) {
+      return res.status(503).json({ error: "Razorpay not configured on server" });
+    }
+    const body = req.body || {};
+    const amount = Number(body.amount);
+    const purpose = String(body.purpose || "payment");
+    const plan = String(body.plan || "");
+    const cycle = String(body.cycle || "");
+    const label = String(body.label || "WorkPilot Tools");
+    const receipt = "wp_" + purpose + "_" + Date.now();
+
+    const order = await razorpay.createOrder(amount, receipt, {
+      purpose,
+      plan,
+      cycle,
+      source: String(body.source || ""),
+    });
+
+    const pub = razorpay.getPublicConfig();
+    res.json({
+      id: order.id,
+      amount: order.amount,
+      currency: order.currency,
+      keyId: pub.keyId,
+      name: pub.name,
+      description: label,
+    });
+  } catch (e) {
+    res.status(400).json({ error: e.message || "Failed to create order" });
+  }
+});
+
+app.post("/api/payments/verify", function (req, res) {
+  try {
+    const body = req.body || {};
+    const orderId = body.razorpay_order_id;
+    const paymentId = body.razorpay_payment_id;
+    const signature = body.razorpay_signature;
+
+    if (!orderId || !paymentId || !signature) {
+      return res.status(400).json({ error: "Missing payment fields" });
+    }
+
+    const ok = razorpay.verifyPaymentSignature(orderId, paymentId, signature);
+    if (!ok) return res.status(400).json({ error: "Invalid payment signature" });
+
+    console.log("Payment verified:", orderId, paymentId);
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(400).json({ error: e.message || "Verification failed" });
+  }
+});
+
 app.get("/api/me", auth.authMiddleware, async function (req, res) {
   try {
     const company = await db.getCompany(req.user.companyId);
@@ -108,8 +168,15 @@ async function start() {
   if (!process.env.JWT_SECRET) {
     console.warn("Warning: JWT_SECRET not set — auth will fail until configured.");
   }
-  await db.initSchema();
-  await db.ensureDefaultCompany();
+  if (!razorpay.isConfigured()) {
+    console.warn("Warning: RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET not set — payments disabled.");
+  }
+  if (process.env.DATABASE_URL) {
+    await db.initSchema();
+    await db.ensureDefaultCompany();
+  } else {
+    console.warn("DATABASE_URL not set — running without BizBuilt cloud DB (payments only).");
+  }
 
   app.listen(PORT, function () {
     console.log("BizBuilt API listening on port " + PORT);

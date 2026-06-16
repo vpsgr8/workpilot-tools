@@ -2,7 +2,26 @@
   var EMAIL_ENDPOINT = "https://formsubmit.co/ajax/mml.products26@gmail.com";
   var EMAIL_STORAGE = "wp-email-subscribed";
   var AMAZON_TAG = "glamstore072-21";
-  var RAZORPAY_DONATE = "https://razorpay.me/@vishalpratapsingh601";
+
+  function scriptPrefix() {
+    var p = location.pathname.replace(/\\/g, "/");
+    if (p.indexOf("/tools/") !== -1 || p.indexOf("/blog/") !== -1 || p.indexOf("/app/") !== -1 || p.indexOf("/bizbuilt/") !== -1) {
+      return "../assets/";
+    }
+    return "assets/";
+  }
+
+  function loadRazorpayScripts() {
+    if (window.RazorpayPay) return;
+    var prefix = scriptPrefix();
+    ["razorpay-config.js", "razorpay-payments.js"].forEach(function (file) {
+      if (document.querySelector('script[src*="' + file + '"]')) return;
+      var s = document.createElement("script");
+      s.src = prefix + file;
+      s.defer = true;
+      document.head.appendChild(s);
+    });
+  }
 
   function amz(asin) {
     return "https://www.amazon.in/dp/" + asin + "?tag=" + AMAZON_TAG;
@@ -328,11 +347,13 @@
     return (
       '<section class="wp-donate-block' + cls + '" aria-label="Support WorkPilot Tools">' +
       "<h3>Support WorkPilot Tools</h3>" +
-      "<p>Enjoy our free tools? A small donation helps us keep building more utilities for everyone.</p>" +
-      '<a class="wp-donate-cta" href="' +
-      RAZORPAY_DONATE +
-      '" rel="noopener" target="_blank">❤ Donate via Razorpay</a>' +
-      "</section>"
+      "<p>Enjoy our free tools? Donate any amount — secured by Razorpay.</p>" +
+      '<div class="wp-donate-amounts">' +
+      '<button type="button" class="wp-donate-cta wp-rzp-pay" data-rzp-purpose="donation" data-rzp-amount="4900">₹49</button>' +
+      '<button type="button" class="wp-donate-cta wp-rzp-pay" data-rzp-purpose="donation" data-rzp-amount="9900">₹99</button>' +
+      '<button type="button" class="wp-donate-cta wp-rzp-pay" data-rzp-purpose="donation" data-rzp-amount="49900">₹499</button>' +
+      '<button type="button" class="wp-donate-cta wp-rzp-pay wp-donate-custom" data-rzp-purpose="donation">Custom</button>' +
+      "</div></section>"
     );
   }
 
@@ -401,14 +422,13 @@
 
   function injectFloatingDonate() {
     if (document.querySelector(".wp-donate-btn")) return;
-    var a = document.createElement("a");
-    a.className = "wp-donate-btn";
-    a.href = RAZORPAY_DONATE;
-    a.target = "_blank";
-    a.rel = "noopener";
-    a.setAttribute("aria-label", "Donate via Razorpay");
-    a.innerHTML = "&#10084; Donate";
-    document.body.appendChild(a);
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "wp-donate-btn wp-rzp-pay";
+    btn.setAttribute("data-rzp-purpose", "donation");
+    btn.setAttribute("aria-label", "Donate via Razorpay");
+    btn.innerHTML = "&#10084; Donate";
+    document.body.appendChild(btn);
   }
 
   function insertEmailCapture() {
@@ -513,6 +533,7 @@
   }
 
   function init() {
+    loadRazorpayScripts();
     insertAffiliateBlock();
     insertDonateBlock();
     injectFloatingDonate();

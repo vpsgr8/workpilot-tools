@@ -1470,7 +1470,8 @@
       '<div class="bb-main"><header class="bb-topbar">' +
       '<div style="display:flex;align-items:center;gap:12px"><button type="button" class="bb-menu-toggle" id="bb-menu-toggle">☰</button><h1>' + esc(TITLES[state.view]) + "</h1></div>" +
       '<div class="bb-topbar-actions"><div id="bb-cloud-auth"></div><button type="button" class="wp-theme-toggle bb-btn">🌙</button>' +
-      '<a class="bb-btn" href="mailto:mml.products26@gmail.com?subject=BizBuilt%20AI%20Upgrade">Upgrade</a>' +
+      '<button type="button" class="bb-btn wp-rzp-pay" data-rzp-purpose="donation" data-rzp-amount="49900">Donate</button>' +
+      '<button type="button" class="bb-btn bb-btn-primary wp-rzp-pay" data-rzp-plan="starter" data-rzp-purpose="subscription">Upgrade</button>' +
       '<button type="button" class="bb-btn" id="bb-reset-demo">Reset demo</button></div></header>' +
       '<div class="bb-content" id="bb-view-content">' +
       (window.BizBuiltCloud && BizBuiltCloud.isEnabled() ? '<div id="bb-cloud-banner"></div>' : "") +

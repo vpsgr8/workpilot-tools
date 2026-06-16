@@ -5,3 +5,5 @@ desktop.ini
 .env
 .env.*
 node_modules/
+rzp-key.csv
+server/.env

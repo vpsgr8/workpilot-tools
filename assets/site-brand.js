@@ -110,10 +110,10 @@
       var text = footer.textContent || "";
       if (text.indexOf("About") !== -1 && text.indexOf("Contact") !== -1) {
         if (text.indexOf("Donate") === -1) {
-          var donateLink = document.createElement("a");
-          donateLink.href = "https://razorpay.me/@vishalpratapsingh601";
-          donateLink.target = "_blank";
-          donateLink.rel = "noopener";
+          var donateLink = document.createElement("button");
+          donateLink.type = "button";
+          donateLink.className = "wp-footer-donate wp-rzp-pay";
+          donateLink.setAttribute("data-rzp-purpose", "donation");
           donateLink.textContent = "Donate";
           footer.appendChild(document.createTextNode(" "));
           footer.appendChild(donateLink);
@@ -148,10 +148,10 @@
       footer.appendChild(document.createTextNode(" "));
       footer.appendChild(contact);
 
-      var donate = document.createElement("a");
-      donate.href = "https://razorpay.me/@vishalpratapsingh601";
-      donate.target = "_blank";
-      donate.rel = "noopener";
+      var donate = document.createElement("button");
+      donate.type = "button";
+      donate.className = "wp-footer-donate wp-rzp-pay";
+      donate.setAttribute("data-rzp-purpose", "donation");
       donate.textContent = "Donate";
 
       footer.appendChild(document.createTextNode(" "));
@@ -205,6 +205,15 @@
     stripTopNavLinks();
     injectHomeButton();
     patchFooterLinks();
+    if (!window.RazorpayPay && !document.querySelector('script[src*="razorpay-payments.js"]')) {
+      var prefix = assetPrefix();
+      ["razorpay-config.js", "razorpay-payments.js"].forEach(function (file) {
+        var s = document.createElement("script");
+        s.src = prefix + file;
+        s.defer = true;
+        document.head.appendChild(s);
+      });
+    }
   }
 
   if (document.readyState === "loading") {

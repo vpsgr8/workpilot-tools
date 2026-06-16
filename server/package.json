@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node index.js",
     "dev": "node --watch index.js",
-    "init-db": "node scripts/init-db.js"
+    "init-db": "node scripts/init-db.js",
+    "sync-rzp-keys": "node scripts/sync-rzp-keys.js"
   },
   "engines": {
     "node": ">=18"
@@ -17,6 +18,7 @@
     "express": "^4.21.2",
     "google-auth-library": "^9.15.1",
     "jsonwebtoken": "^9.0.2",
-    "pg": "^8.13.3"
+    "pg": "^8.13.3",
+    "razorpay": "^2.9.6"
   }
 }

@@ -22,6 +22,27 @@ Deploy BizBuilt on a customer's Google Cloud project with their domain.
    - `https://workpilottools.biz` (for staging)
 4. PostgreSQL instance in **asia-south1** (Mumbai)
 
+## Razorpay payments (donate + BizBuilt subscriptions)
+
+1. Copy keys from `rzp-key.csv` into `server/.env` (never commit `.env`):
+   ```bash
+   cd server
+   npm run sync-rzp-keys
+   ```
+2. Start API locally:
+   ```bash
+   npm run dev
+   ```
+3. Set your Cloud Run URL in `assets/razorpay-config.js`:
+   ```javascript
+   apiUrl: "https://your-api-xxxxx.run.app"
+   ```
+4. Add the same URL to `CORS_ORIGINS` in server `.env`.
+
+**Endpoints:** `GET /api/payments/config`, `POST /api/payments/order`, `POST /api/payments/verify`
+
+Until `apiUrl` is set on the live site, donate buttons fall back to your Razorpay.me link.
+
 ## Quick start (local API dev)
 
 ```bash
