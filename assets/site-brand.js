@@ -23,6 +23,86 @@
     return depthPrefix() + "contact.html";
   }
 
+  function productsHref() {
+    return depthPrefix() + "our-products.html";
+  }
+
+  var OTHER_PRODUCTS = [
+    {
+      id: "workpilot",
+      name: "WorkPilot Tools",
+      url: null,
+      internal: "index.html",
+      tag: "Free tools",
+      desc: "67+ PDF, AI, image, finance & baby tools — no signup.",
+    },
+    {
+      id: "bizbuilt",
+      name: "BizBuilt AI",
+      url: null,
+      internal: "bizbuilt-ai.html",
+      tag: "Premium SME",
+      desc: "CRM, HR, payroll, inventory & AI Copilot for growing businesses.",
+    },
+    {
+      id: "englishlearner",
+      name: "English Learner Store",
+      url: "https://englishlearner.store",
+      tag: "Learning",
+      desc: "English vocabulary, grammar & practice resources for learners.",
+    },
+    {
+      id: "logictrade",
+      name: "LogicTrade",
+      url: "https://logictrade.site",
+      tag: "Finance",
+      desc: "Logic-based trading education, risk tools & disciplined planning.",
+    },
+  ];
+
+  function productCardHtml(p) {
+    var href = p.internal ? depthPrefix() + p.internal : p.url;
+    var ext = p.url ? ' target="_blank" rel="noopener"' : "";
+    return (
+      '<article class="wp-footer-product">' +
+      '<span class="wp-footer-product-tag">' + p.tag + "</span>" +
+      "<h3><a href=\"" + href + "\"" + ext + ">" + p.name + "</a></h3>" +
+      "<p>" + p.desc + "</p>" +
+      '<a class="wp-footer-product-link" href="' + href + '"' + ext + ">Visit →</a>" +
+      "</article>"
+    );
+  }
+
+  function injectFooterProducts() {
+    if (document.querySelector(".wp-footer-products")) return;
+
+    var cards = OTHER_PRODUCTS.map(productCardHtml).join("");
+    var html =
+      '<section class="wp-footer-products" aria-label="Our other products">' +
+      '<div class="wp-footer-products-inner">' +
+      "<h2>Our Products</h2>" +
+      "<p>More from <strong>MarketMind Labs</strong> — free tools, business software, learning &amp; finance.</p>" +
+      '<div class="wp-footer-products-grid">' + cards + "</div>" +
+      '<p class="wp-footer-products-more"><a href="' + productsHref() + '">View all products &amp; details →</a></p>' +
+      "</div></section>";
+
+    var footer = document.querySelector("footer");
+    if (footer) {
+      footer.insertAdjacentHTML("beforebegin", html);
+    } else {
+      document.body.insertAdjacentHTML("beforeend", html);
+    }
+  }
+
+  function appendFooterNavLink(footer, href, text) {
+    if ((footer.textContent || "").indexOf(text) !== -1) return;
+    footer.appendChild(document.createTextNode(" "));
+    var a = document.createElement("a");
+    a.href = href;
+    a.textContent = text;
+    footer.appendChild(a);
+  }
+
   function brandHtml(prefix) {
     return (
       '<img class="wp-logo wp-logo-mml" src="' +
@@ -105,9 +185,14 @@
   }
 
   function patchFooterLinks() {
+    injectFooterProducts();
+
     document.querySelectorAll("footer").forEach(function (footer) {
       if (footer.dataset.wpBrandPatched) return;
       var text = footer.textContent || "";
+
+      appendFooterNavLink(footer, productsHref(), "Our Products");
+
       if (text.indexOf("About") !== -1 && text.indexOf("Contact") !== -1) {
         if (text.indexOf("Donate") === -1) {
           var donateLink = document.createElement("button");
@@ -119,52 +204,27 @@
           footer.appendChild(donateLink);
         }
         if (text.indexOf("BizBuilt") === -1) {
-          var premium = document.createElement("a");
-          premium.href = depthPrefix() + "bizbuilt-ai.html";
-          premium.textContent = "BizBuilt AI Premium";
-          footer.appendChild(document.createTextNode(" "));
-          footer.appendChild(premium);
+          appendFooterNavLink(footer, depthPrefix() + "bizbuilt-ai.html", "BizBuilt AI Premium");
         }
         footer.dataset.wpBrandPatched = "1";
         return;
       }
 
-      var about = document.createElement("a");
-      about.href = aboutHref();
-      about.textContent = "About Us";
-
-      var contact = document.createElement("a");
-      contact.href = contactHref();
-      contact.textContent = "Contact Us";
-
-      var home = document.createElement("a");
-      home.href = homeHref();
-      home.textContent = "Home";
-
-      footer.appendChild(document.createTextNode(" "));
-      footer.appendChild(home);
-      footer.appendChild(document.createTextNode(" "));
-      footer.appendChild(about);
-      footer.appendChild(document.createTextNode(" "));
-      footer.appendChild(contact);
+      appendFooterNavLink(footer, homeHref(), "Home");
+      appendFooterNavLink(footer, aboutHref(), "About Us");
+      appendFooterNavLink(footer, contactHref(), "Contact Us");
 
       var donate = document.createElement("button");
       donate.type = "button";
       donate.className = "wp-footer-donate wp-rzp-pay";
       donate.setAttribute("data-rzp-purpose", "donation");
       donate.textContent = "Donate";
-
       footer.appendChild(document.createTextNode(" "));
       footer.appendChild(donate);
 
-      var premium = document.createElement("a");
-      premium.href = depthPrefix() + "bizbuilt-ai.html";
-      premium.textContent = "BizBuilt AI Premium";
+      appendFooterNavLink(footer, depthPrefix() + "bizbuilt-ai.html", "BizBuilt AI Premium");
 
-      footer.appendChild(document.createTextNode(" "));
-      footer.appendChild(premium);
-
-      if (footer.querySelector("span") || footer.textContent.indexOf("MarketMind") === -1) {
+      if (footer.querySelector("span") || text.indexOf("MarketMind") === -1) {
         var note = document.createElement("span");
         note.style.display = "block";
         note.style.width = "100%";

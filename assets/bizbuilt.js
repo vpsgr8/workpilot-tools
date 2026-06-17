@@ -1466,7 +1466,7 @@
       '<aside class="bb-sidebar" id="bb-sidebar">' +
       '<div class="bb-brand"><strong>BizBuilt AI</strong><small>The SME Operating System</small><span class="bb-premium-badge">Premium</span></div>' +
       '<nav class="bb-nav">' + navHtml + "</nav>" +
-      '<div class="bb-sidebar-foot"><a href="../bizbuilt-ai.html">← Product info</a><a href="../index.html">WorkPilot Tools</a></div></aside>' +
+      '<div class="bb-sidebar-foot"><a href="../our-products.html">Our Products</a><a href="../bizbuilt-ai.html">← Product info</a><a href="../index.html">WorkPilot Tools</a></div></aside>' +
       '<div class="bb-main"><header class="bb-topbar">' +
       '<div style="display:flex;align-items:center;gap:12px"><button type="button" class="bb-menu-toggle" id="bb-menu-toggle">☰</button><h1>' + esc(TITLES[state.view]) + "</h1></div>" +
       '<div class="bb-topbar-actions"><div id="bb-cloud-auth"></div><button type="button" class="wp-theme-toggle bb-btn">🌙</button>' +
