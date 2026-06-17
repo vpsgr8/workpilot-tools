@@ -6,6 +6,21 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { COMPARISONS } from "./finance-comparison-registry.mjs";
 
+const BLOG_FOR_COMPARE = {
+  "sip-vs-fd": "sip-vs-fd-complete-comparison.html",
+  "sip-vs-lumpsum": "mutual-fund-sip-beginners-guide.html",
+  "new-vs-old-tax-regime": "new-vs-old-tax-regime-guide.html",
+  "home-loan-vs-personal-loan": "home-loan-vs-personal-loan-guide.html",
+  "emi-vs-credit-card-emi": "credit-card-emi-vs-personal-loan.html",
+  "compound-vs-simple-interest": "compound-interest-formula-guide.html",
+  "rd-vs-sip": "mutual-fund-sip-beginners-guide.html",
+  "delivery-vs-intraday": "brokerage-charges-india-explained.html",
+  "ppf-vs-fd": "fd-calculator-guide-india.html",
+  "mutual-fund-vs-stock": "mutual-fund-sip-beginners-guide.html",
+  "retirement-sip-vs-fd": "retirement-planning-india-guide.html",
+  "car-loan-vs-personal-loan": "home-loan-vs-personal-loan-guide.html",
+};
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, "..");
 const COMPARE_DIR = path.join(ROOT, "compare");
@@ -28,6 +43,10 @@ function tableRows(rows) {
 }
 
 function comparePage(c) {
+  const blogSlug = BLOG_FOR_COMPARE[c.slug];
+  const blogBlock = blogSlug
+    ? `<p style="margin-top:16px;font-size:14px">📖 Read the full guide: <a href="../blog/${blogSlug}">${esc(c.title)} — detailed blog</a> · <a href="../blog/finance-calculators-complete-guide.html">Finance calculators guide</a></p>`
+    : `<p style="margin-top:16px;font-size:14px">📖 <a href="../blog/finance-calculators-complete-guide.html">100+ finance calculators guide</a> · <a href="../tools/ai-financial-planner.html">AI Financial Planner</a></p>`;
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -88,7 +107,8 @@ h1{margin:0 0 8px;font-size:clamp(1.5rem,4vw,2rem)}
       <a href="../tools/${c.right.slug}.html">${esc(c.right.name)} calculator →</a>
     </div>
   </div>
-  <p style="font-size:14px;color:#5b6472"><a href="../finance-compare.html">All finance comparisons</a> · <a href="../finance-tools.html">Finance calculators</a></p>
+  ${blogBlock}
+  <p style="font-size:14px;color:#5b6472"><a href="../finance-compare.html">All finance comparisons</a> · <a href="../finance-tools.html">Finance calculators</a> · <a href="../blog/index.html">Blog</a></p>
 </main>
 </body>
 </html>`;

@@ -31,6 +31,47 @@ function faqBlock(title) {
   </div>`;
 }
 
+function seoKeywords(tool) {
+  const base = tool.slug.replace(/-/g, " ");
+  const india = "india, free online, no signup, workpilot tools, workpilottools.biz";
+  const extra = {
+    "sip-calculator": "mutual fund sip, sip returns, monthly sip",
+    "emi-calculator": "loan emi, monthly emi, emi formula",
+    "income-tax-calculator": "income tax india 2026, tax calculator, salary tax",
+    "gst-calculator": "gst calculator india, add remove gst, gst rate",
+    "fd-calculator": "fixed deposit calculator, fd interest, fd maturity",
+    "home-loan-emi-calculator": "home loan emi, housing loan calculator",
+    "ai-financial-planner": "ai financial planner, investment planning, retirement plan",
+  };
+  return `${base}, ${extra[tool.slug] || "finance calculator"}, ${india}`;
+}
+
+const BLOG_BY_TOOL = {
+  "sip-calculator": ["sip-vs-fd-complete-comparison.html", "mutual-fund-sip-beginners-guide.html"],
+  "emi-calculator": ["emi-calculator-explained.html", "reduce-emi-burden-tips.html"],
+  "income-tax-calculator": ["income-tax-calculator-india-2026.html", "new-vs-old-tax-regime-guide.html"],
+  "new-vs-old-tax-regime-calculator": ["new-vs-old-tax-regime-guide.html"],
+  "gst-calculator": ["how-to-create-gst-invoice.html"],
+  "fd-calculator": ["fd-calculator-guide-india.html"],
+  "home-loan-emi-calculator": ["home-loan-emi-guide.html", "home-loan-vs-personal-loan-guide.html"],
+  "personal-loan-emi-calculator": ["personal-loan-calculator-guide.html", "credit-card-emi-vs-personal-loan.html"],
+  "loan-eligibility-calculator": ["loan-eligibility-complete-guide.html", "loan-eligibility-explained.html"],
+  "brokerage-calculator": ["brokerage-charges-india-explained.html"],
+  "retirement-corpus-calculator": ["retirement-planning-india-guide.html"],
+  "compound-interest-calculator": ["compound-interest-formula-guide.html"],
+  "in-hand-salary-calculator": ["in-hand-salary-india-guide.html"],
+  "net-worth-calculator": ["net-worth-tracking-guide.html"],
+  "credit-card-emi-calculator": ["credit-card-emi-vs-personal-loan.html"],
+};
+
+function blogGuidesBlock(slug) {
+  const guides = BLOG_BY_TOOL[slug] || ["finance-calculators-complete-guide.html"];
+  const links = guides
+    .map((g) => `<a href="../blog/${g}" class="fc-related">${g.replace(/-/g, " ").replace(".html", "")}</a>`)
+    .join("\n");
+  return `<div class="card"><h2 style="margin:0 0 12px;font-size:1.1rem">Guides &amp; comparisons</h2>${links}<p style="margin:12px 0 0;font-size:13px;color:#5b6472"><a href="../finance-compare.html">Finance comparisons</a> · <a href="../blog/index.html">All blog guides</a></p></div>`;
+}
+
 function toolPage(tool) {
   const cfg = JSON.stringify({ ...(tool.config || {}), slug: tool.slug }).replace(/"/g, "&quot;");
   const related = (tool.related || [])
@@ -54,7 +95,7 @@ function toolPage(tool) {
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Free ${esc(tool.title)} Online | WorkPilot Tools</title>
 <meta name="description" content="${esc(tool.desc)} Free, private calculator — no signup, runs in your browser.">
-<meta name="keywords" content="${esc(tool.slug.replace(/-/g, " "))}, free finance calculator, ${esc(tool.title.toLowerCase())}, workpilot tools">
+<meta name="keywords" content="${esc(seoKeywords(tool))}">
 <link rel="canonical" href="https://workpilottools.biz/tools/${tool.slug}.html">
 <link rel="stylesheet" href="../assets/theme.css">
 <link rel="stylesheet" href="../assets/monetization.css">
@@ -93,7 +134,7 @@ h1{margin:0 0 8px;font-size:clamp(1.5rem,4vw,2rem)}
   <a href="../index.html">← WorkPilot Tools</a>
   <nav>
     <a href="../finance-tools.html">Finance Tools</a>
-    <a href="../business-tools.html">Business</a>
+    <a href="../finance-compare.html">Compare</a>
     <a href="../blog/index.html">Blog</a>
   </nav>
 </header>
@@ -108,8 +149,9 @@ h1{margin:0 0 8px;font-size:clamp(1.5rem,4vw,2rem)}
     <h2 style="margin:0 0 12px;font-size:1.1rem">Related calculators</h2>
     ${related || '<p style="color:#5b6472;margin:0">Browse all tools on the <a href="../finance-tools.html">finance hub</a>.</p>'}
   </div>
+  ${blogGuidesBlock(tool.slug)}
   ${faqBlock(tool.title)}
-  <p style="font-size:14px;color:#5b6472"><a href="../finance-tools.html">All finance calculators</a> · <a href="../our-products.html">Our Products</a></p>
+  <p style="font-size:14px;color:#5b6472"><a href="../finance-tools.html">All finance calculators</a> · <a href="../tools/ai-financial-planner.html">AI Planner</a> · <a href="../our-products.html">Our Products</a></p>
 </main>
 </body>
 </html>`;
@@ -138,7 +180,7 @@ function hubPage() {
 <html lang="en"><head>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-R0HRTRJJFN"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-R0HRTRJJFN');</script>
-<meta name="keywords" content="finance calculator, SIP calculator, EMI calculator, income tax calculator, GST calculator, FD calculator, stock calculator, free finance tools india">
+<meta name="keywords" content="finance calculator, SIP calculator, EMI calculator, income tax calculator, GST calculator, FD calculator, CAGR calculator, stock calculator, loan eligibility, retirement calculator, free finance tools india, workpilot tools">
 <script>try{var t=localStorage.getItem('wp-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark')}catch(e){}</script>
 <link rel="stylesheet" href="assets/theme.css">
 <link rel="stylesheet" href="assets/monetization.css">
