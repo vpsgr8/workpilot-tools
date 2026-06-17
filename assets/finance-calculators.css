@@ -90,3 +90,14 @@ html[data-theme="dark"] .fc-kpi {
   background: #312e81;
   border-color: #4338ca;
 }
+
+.fc-compare-results {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.fc-compare-widget .fc-form {
+  margin-top: 16px;
+}

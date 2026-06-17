@@ -315,6 +315,7 @@
     "video-tools.html": "video",
     "business-tools.html": "business",
     "finance-tools.html": "finance",
+    "finance-compare.html": "finance",
     "pregnancy-tools.html": "pregnancy",
     "baby-parenting-tools.html": "baby",
   };
@@ -327,7 +328,7 @@
 
   function inferCategory(slug) {
     if (slug && TOOL_CATEGORIES[slug]) return TOOL_CATEGORIES[slug];
-    if (slug && /calculator|converter|sip|emi|tax|loan|fd|rd|cagr|swp|xirr|irr|brokerage|margin|forex|currency|salary|retirement|fire|gst|tds|hra|roi|roe|roce|burn|runway|pricing|valuation|dividend|portfolio|nifty|pivot|fibonacci|gann|inflation|net-worth|equity|mortgage|pnl|payoff|rebalance|journal|psychology/.test(slug)) {
+    if (slug && /calculator|converter|sip|emi|tax|loan|fd|rd|cagr|swp|xirr|irr|brokerage|margin|forex|currency|salary|retirement|fire|gst|tds|hra|roi|roe|roce|burn|runway|pricing|valuation|dividend|portfolio|nifty|pivot|fibonacci|gann|inflation|net-worth|equity|mortgage|pnl|payoff|rebalance|journal|psychology|ai-financial|financial-planner/.test(slug)) {
       return "finance";
     }
     return null;

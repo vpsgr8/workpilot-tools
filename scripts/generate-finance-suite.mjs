@@ -177,10 +177,21 @@ footer{border-top:1px solid #e5e7eb;color:#5b6472;padding:24px 0 36px}
 <main class="wrap">
 <section class="hero">
 <h1>100+ Finance Calculators</h1>
-<p>Investment, loans, tax, salary, stocks, banking, and financial planning — free calculators built for India. Private, instant, no signup.</p>
+<p>Investment, loans, tax, salary, stocks, banking, and financial planning — free calculators built for India. Private, instant, no signup. <a href="finance-compare.html">Compare products</a> · <a href="tools/ai-financial-planner.html">AI planner</a></p>
 </section>
 <p class="feat-label">⭐ Top traffic calculators</p>
 <section class="grid">${featCards}</section>
+<h2 class="section-label">🤖 AI Financial Planning</h2>
+<section class="grid">
+<a class="card card--feat" href="tools/ai-financial-planner.html"><strong>AI Financial Planner</strong><span>Personalised SIP, emergency fund, retirement plan &amp; projections</span></a>
+</section>
+<h2 class="section-label">⚖️ Comparison Guides</h2>
+<section class="grid">
+<a class="card" href="finance-compare.html"><strong>All Finance Comparisons</strong><span>SIP vs FD, tax regime, loans, trading modes &amp; more</span></a>
+<a class="card" href="compare/sip-vs-fd.html"><strong>SIP vs FD</strong><span>Which investment suits your goals?</span></a>
+<a class="card" href="compare/new-vs-old-tax-regime.html"><strong>New vs Old Tax Regime</strong><span>Which saves more tax for you?</span></a>
+<a class="card" href="compare/home-loan-vs-personal-loan.html"><strong>Home Loan vs Personal Loan</strong><span>Rate, tenure &amp; tax benefits</span></a>
+</section>
 ${sections}
 <p style="color:#5b6472;font-size:14px;padding:24px 0">Guides on the <a href="blog/index.html">WorkPilot blog</a> · <a href="our-products.html">Our Products</a> · <a href="bizbuilt-ai.html">BizBuilt AI</a></p>
 </main>
