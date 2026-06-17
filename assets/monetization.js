@@ -199,6 +199,7 @@
     audio: P.boatHeadphones,
     video: P.logitechWebcam,
     business: P.casioCalc,
+    finance: P.financeBook,
     pregnancy: P.pregnancyBook,
     baby: P.babyDiapers,
   };
@@ -254,6 +255,11 @@
     "sip-calculator": P.financeBook,
     "gst-calculator": P.casioCalc,
     "loan-calculator": P.financeBook,
+    "mortgage-calculator": P.financeBook,
+    "home-loan-calculator": P.financeBook,
+    "car-loan-calculator": P.financeBook,
+    "home-equity-calculator": P.financeBook,
+    "reverse-mortgage-calculator": P.financeBook,
     "qr-code-studio": P.labelPrinter,
     "resume-builder": P.resumeFolder,
     "pregnancy-due-date": P.pregnancyBook,
@@ -289,8 +295,10 @@
     "screen-recorder": "video",
     "barcode-generator": "business", "business-card": "business", "document-scanner": "business",
     "invoice-generator": "business", "qr-generator": "business", "age-calculator": "business",
-    "emi-calculator": "business", "sip-calculator": "business", "gst-calculator": "business",
-    "loan-calculator": "business", "qr-code-studio": "business", "resume-builder": "business",
+    "emi-calculator": "finance", "sip-calculator": "finance", "gst-calculator": "finance",
+    "loan-calculator": "finance", "mortgage-calculator": "finance", "home-loan-calculator": "finance",
+    "car-loan-calculator": "finance", "home-equity-calculator": "finance", "reverse-mortgage-calculator": "finance",
+    "qr-code-studio": "business", "resume-builder": "business",
     "pregnancy-due-date": "pregnancy", "pregnancy-week": "pregnancy", "ovulation-calculator": "pregnancy",
     "fertility-calculator": "pregnancy", "pregnancy-weight-gain": "pregnancy", "pregnancy-bmi": "pregnancy",
     "baby-gender-predictor": "pregnancy", "baby-name-generator": "pregnancy", "conception-date": "pregnancy",
@@ -306,6 +314,7 @@
     "audio-tools.html": "audio",
     "video-tools.html": "video",
     "business-tools.html": "business",
+    "finance-tools.html": "finance",
     "pregnancy-tools.html": "pregnancy",
     "baby-parenting-tools.html": "baby",
   };
@@ -316,9 +325,17 @@
     return d.innerHTML;
   }
 
+  function inferCategory(slug) {
+    if (slug && TOOL_CATEGORIES[slug]) return TOOL_CATEGORIES[slug];
+    if (slug && /calculator|converter|sip|emi|tax|loan|fd|rd|cagr|swp|xirr|irr|brokerage|margin|forex|currency|salary|retirement|fire|gst|tds|hra|roi|roe|roce|burn|runway|pricing|valuation|dividend|portfolio|nifty|pivot|fibonacci|gann|inflation|net-worth|equity|mortgage|pnl|payoff|rebalance|journal|psychology/.test(slug)) {
+      return "finance";
+    }
+    return null;
+  }
+
   function getAffiliate(slug) {
     if (slug && TOOL_AFFILIATES[slug]) return TOOL_AFFILIATES[slug];
-    var cat = (slug && TOOL_CATEGORIES[slug]) || slug || "business";
+    var cat = inferCategory(slug) || slug || "business";
     return CATEGORY_AFFILIATES[cat] || CATEGORY_AFFILIATES.business;
   }
 

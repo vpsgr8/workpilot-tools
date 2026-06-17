@@ -34,7 +34,7 @@
       url: null,
       internal: "index.html",
       tag: "Free tools",
-      desc: "67+ PDF, AI, image, finance & baby tools — no signup.",
+      desc: "170+ PDF, AI, finance & baby tools — 100+ free calculators.",
     },
     {
       id: "bizbuilt",
