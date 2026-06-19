@@ -54,9 +54,16 @@ function verifyPaymentSignature(orderId, paymentId, signature) {
   return expected === signature;
 }
 
+async function fetchOrder(orderId) {
+  const client = getClient();
+  return client.orders.fetch(orderId);
+}
+
 module.exports = {
   isConfigured,
   getPublicConfig,
   createOrder,
   verifyPaymentSignature,
+  fetchOrder,
+  getClient,
 };

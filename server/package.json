@@ -20,5 +20,8 @@
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.13.3",
     "razorpay": "^2.9.6"
+  },
+  "devDependencies": {
+    "pdf-lib": "^1.17.1"
   }
 }

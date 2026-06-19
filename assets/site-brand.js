@@ -49,7 +49,7 @@
       name: "English Learner Store",
       url: "https://englishlearner.store",
       tag: "Learning",
-      desc: "English vocabulary, grammar & practice resources for learners.",
+      desc: "English vocabulary, grammar & practice — plus paid PDF eBooks.",
     },
     {
       id: "logictrade",
