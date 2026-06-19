@@ -76,6 +76,32 @@ Open site locally with `apiUrl: "http://localhost:8080"` in `razorpay-config.js`
 
 ## After apiUrl is live
 
+1. Open https://workpilottools.biz/ebooks.html
+2. Preview 7 pages, then **Buy** → Razorpay popup
+3. After payment, download the full PDF from the book page
+4. Donate / BizBuilt buttons also use the same payment API
+
+---
+
+## eBook store (Text Like a Pro + Unseen India)
+
+| Item | Detail |
+|------|--------|
+| Store hub | https://workpilottools.biz/ebooks.html |
+| Payment API | Must include `JWT_SECRET` for download tokens |
+| Full PDFs | Bundled in `server/ebooks/` (not public static files) |
+| Previews | `assets/ebooks/previews/*` (7 pages each) |
+
+**Render:** set `JWT_SECRET` in dashboard (same value as local `server/.env` after `npm run ensure-production-env`).
+
+**Test API:**
+- `GET /api/payments/config` → `"enabled": true`
+- `GET /api/ebooks/catalog` → book list with prices
+
+---
+
+## After apiUrl is live (donations)
+
 1. Open https://workpilottools.biz
 2. Click **Donate** → Razorpay popup (not razorpay.me redirect)
 3. BizBuilt **Pay — Get Starter** uses selected billing cycle amount

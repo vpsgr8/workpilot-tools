@@ -8,6 +8,6 @@
  */
 window.RAZORPAY_CONFIG = {
   keyId: "rzp_live_T28wwjAyHRA0jd",
-  apiUrl: "", // e.g. "https://workpilot-payments.onrender.com"
+  apiUrl: "https://workpilot-payments.onrender.com",
   fallbackMeLink: "https://razorpay.me/@vishalpratapsingh601",
 };

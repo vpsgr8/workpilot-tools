@@ -12,7 +12,7 @@ on:
 
 jobs:
   deploy:
-    if: ${{ secrets.GCP_PROJECT_ID != '' && secrets.GCP_SA_KEY != '' && secrets.RAZORPAY_KEY_SECRET != '' }}
+    if: ${{ secrets.GCP_PROJECT_ID != '' && secrets.GCP_SA_KEY != '' && secrets.RAZORPAY_KEY_SECRET != '' && secrets.JWT_SECRET != '' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -30,7 +30,7 @@ jobs:
             --project "${{ secrets.GCP_PROJECT_ID }}" \
             --region asia-south1 \
             --allow-unauthenticated \
-            --set-env-vars "RAZORPAY_KEY_ID=rzp_live_T28wwjAyHRA0jd,RAZORPAY_KEY_SECRET=${{ secrets.RAZORPAY_KEY_SECRET }},CORS_ORIGINS=https://workpilottools.biz,RAZORPAY_MERCHANT_NAME=WorkPilot Tools,RAZORPAY_MERCHANT_DESC=MarketMind Labs"
+            --set-env-vars "RAZORPAY_KEY_ID=rzp_live_T28wwjAyHRA0jd,RAZORPAY_KEY_SECRET=${{ secrets.RAZORPAY_KEY_SECRET }},JWT_SECRET=${{ secrets.JWT_SECRET }},CORS_ORIGINS=https://workpilottools.biz,https://www.workpilottools.biz,https://englishlearner.store,https://logictrade.site,RAZORPAY_MERCHANT_NAME=WorkPilot Tools,RAZORPAY_MERCHANT_DESC=MarketMind Labs"
 
       - name: Print service URL
         run: |

@@ -20,10 +20,17 @@ if (-not (Test-Path $EnvFile)) {
 }
 
 $secret = (Get-Content $EnvFile | Where-Object { $_ -match "^RAZORPAY_KEY_SECRET=" }) -replace "^RAZORPAY_KEY_SECRET=", ""
+$jwt = (Get-Content $EnvFile | Where-Object { $_ -match "^JWT_SECRET=" }) -replace "^JWT_SECRET=", ""
 if (-not $secret) {
   Write-Host "RAZORPAY_KEY_SECRET missing in server/.env" -ForegroundColor Red
   exit 1
 }
+if (-not $jwt) {
+  Write-Host "JWT_SECRET missing — run: cd server && node scripts/ensure-production-env.js" -ForegroundColor Red
+  exit 1
+}
+
+$cors = "https://workpilottools.biz,https://www.workpilottools.biz,https://englishlearner.store,https://logictrade.site"
 
 gcloud config set project $ProjectId
 
@@ -33,7 +40,7 @@ gcloud run deploy $ServiceName `
   --source $ServerDir `
   --region $Region `
   --allow-unauthenticated `
-  --set-env-vars "RAZORPAY_KEY_ID=rzp_live_T28wwjAyHRA0jd,RAZORPAY_KEY_SECRET=$secret,CORS_ORIGINS=https://workpilottools.biz,RAZORPAY_MERCHANT_NAME=WorkPilot Tools,RAZORPAY_MERCHANT_DESC=MarketMind Labs"
+  --set-env-vars "RAZORPAY_KEY_ID=rzp_live_T28wwjAyHRA0jd,RAZORPAY_KEY_SECRET=$secret,JWT_SECRET=$jwt,CORS_ORIGINS=$cors,RAZORPAY_MERCHANT_NAME=WorkPilot Tools,RAZORPAY_MERCHANT_DESC=MarketMind Labs"
 
 $url = gcloud run services describe $ServiceName --region $Region --format "value(status.url)"
 Write-Host ""

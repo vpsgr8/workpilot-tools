@@ -1,0 +1,20 @@
+# Trigger Render redeploy when RENDER_DEPLOY_HOOK secret is set.
+# Create hook: Render dashboard → workpilot-payments → Settings → Deploy Hook
+name: Deploy Payments API (Render)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "server/**"
+      - "render.yaml"
+      - ".github/workflows/deploy-payments-render.yml"
+
+jobs:
+  deploy:
+    if: ${{ secrets.RENDER_DEPLOY_HOOK != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render deploy
+        run: curl -fsS -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"

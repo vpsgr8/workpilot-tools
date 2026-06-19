@@ -18,10 +18,12 @@ services:
       - key: PORT
         value: 8080
       - key: CORS_ORIGINS
-        value: https://workpilottools.biz,https://www.workpilottools.biz
+        value: https://workpilottools.biz,https://www.workpilottools.biz,https://englishlearner.store,https://logictrade.site
       - key: RAZORPAY_KEY_ID
         value: rzp_live_T28wwjAyHRA0jd
       - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: JWT_SECRET
         sync: false
       - key: RAZORPAY_MERCHANT_NAME
         value: WorkPilot Tools
