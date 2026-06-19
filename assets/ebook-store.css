@@ -1,0 +1,306 @@
+/* MarketMind Labs — paid eBook store (preview + Razorpay + secure download) */
+
+:root {
+  --es-accent: #6366f1;
+  --es-accent-dark: #4338ca;
+  --es-bg: #f7f8fb;
+  --es-card: #fff;
+  --es-text: #111827;
+  --es-muted: #5b6472;
+  --es-border: #e5e7eb;
+}
+
+[data-ebook-site="englishlearner"] {
+  --es-accent: #059669;
+  --es-accent-dark: #047857;
+}
+
+[data-ebook-site="logictrade"] {
+  --es-accent: #d97706;
+  --es-accent-dark: #b45309;
+}
+
+.es-page {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  background: var(--es-bg);
+  color: var(--es-text);
+}
+
+.es-nav {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  border-bottom: 1px solid var(--es-border);
+  background: var(--es-card);
+}
+
+.es-nav a {
+  color: var(--es-accent);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.es-wrap {
+  width: min(960px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 40px 0 64px;
+}
+
+.es-wrap--wide {
+  width: min(1100px, calc(100% - 32px));
+}
+
+.es-hero h1 {
+  font-size: clamp(28px, 5vw, 42px);
+  margin: 0 0 10px;
+}
+
+.es-lead {
+  color: var(--es-muted);
+  font-size: 18px;
+  line-height: 1.6;
+  max-width: 720px;
+  margin: 0 0 28px;
+}
+
+.es-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+.es-card {
+  background: var(--es-card);
+  border: 1px solid var(--es-border);
+  border-radius: 14px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.es-card h2,
+.es-card h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.es-card p {
+  margin: 0;
+  color: var(--es-muted);
+  line-height: 1.55;
+  font-size: 15px;
+  flex: 1;
+}
+
+.es-tag {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--es-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.es-price {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.es-price-sale {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--es-text);
+}
+
+.es-price-mrp {
+  font-size: 1rem;
+  color: #9ca3af;
+  text-decoration: line-through;
+}
+
+.es-price-note {
+  font-size: 13px;
+  color: var(--es-muted);
+}
+
+.es-btn {
+  display: inline-block;
+  padding: 10px 18px;
+  background: var(--es-accent);
+  color: #fff;
+  text-decoration: none;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.es-btn:hover {
+  background: var(--es-accent-dark);
+}
+
+.es-btn--ghost {
+  background: #eef2ff;
+  color: var(--es-accent-dark);
+}
+
+[data-ebook-site="englishlearner"] .es-btn--ghost {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+[data-ebook-site="logictrade"] .es-btn--ghost {
+  background: #fffbeb;
+  color: #b45309;
+}
+
+.es-btn--block {
+  width: 100%;
+  text-align: center;
+}
+
+.es-detail {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 28px;
+  align-items: start;
+}
+
+@media (max-width: 860px) {
+  .es-detail {
+    grid-template-columns: 1fr;
+  }
+}
+
+.es-buy-box {
+  background: var(--es-card);
+  border: 1px solid var(--es-border);
+  border-radius: 14px;
+  padding: 22px;
+  position: sticky;
+  top: 16px;
+}
+
+.es-buy-box h2 {
+  margin: 0 0 8px;
+  font-size: 1.35rem;
+}
+
+.es-preview {
+  background: var(--es-card);
+  border: 1px solid var(--es-border);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.es-preview-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.es-preview-head h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.es-preview-badge {
+  font-size: 12px;
+  font-weight: 700;
+  background: #fef3c7;
+  color: #92400e;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.es-preview-pages {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.es-preview-page {
+  border: 1px solid var(--es-border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f3f4f6;
+}
+
+.es-preview-page canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.es-preview-lock {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #eef2ff, #f5f3ff);
+  text-align: center;
+  font-size: 14px;
+  color: var(--es-muted);
+}
+
+.es-owned {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 10px;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #065f46;
+  font-size: 14px;
+}
+
+.es-owned strong {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.es-footer {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 24px 20px;
+  color: var(--es-muted);
+  font-size: 14px;
+  border-top: 1px solid var(--es-border);
+}
+
+.es-trust {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 13px;
+  color: var(--es-muted);
+  margin-top: 12px;
+}
+
+.es-trust span::before {
+  content: "✓ ";
+  color: var(--es-accent);
+  font-weight: 700;
+}
+
+.es-loading {
+  padding: 24px;
+  text-align: center;
+  color: var(--es-muted);
+}
+
+.es-embed-grid .es-card {
+  height: 100%;
+}

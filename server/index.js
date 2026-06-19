@@ -5,9 +5,11 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+const fs = require("fs");
 const db = require("./db");
 const auth = require("./auth");
 const razorpay = require("./razorpay");
+const ebooks = require("./ebooks");
 
 const app = express();
 const PORT = Number(process.env.PORT) || 8080;
@@ -87,6 +89,28 @@ app.put("/api/data", auth.authMiddleware, async function (req, res) {
   }
 });
 
+app.get("/api/ebooks/catalog", function (_req, res) {
+  res.json({ books: ebooks.listPublicCatalog() });
+});
+
+app.get("/api/ebooks/download", function (req, res) {
+  try {
+    const token = String(req.query.token || "");
+    if (!token) return res.status(400).json({ error: "Missing download token" });
+
+    const { product } = ebooks.verifyDownloadToken(token);
+    const filePath = ebooks.resolveFullPdfPath(product);
+    const filename = product.file;
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", 'attachment; filename="' + filename + '"');
+    res.setHeader("Cache-Control", "private, no-store");
+    fs.createReadStream(filePath).pipe(res);
+  } catch (e) {
+    res.status(403).json({ error: e.message || "Download not allowed" });
+  }
+});
+
 app.get("/api/payments/config", function (_req, res) {
   res.json(razorpay.getPublicConfig());
 });
@@ -97,19 +121,39 @@ app.post("/api/payments/order", async function (req, res) {
       return res.status(503).json({ error: "Razorpay not configured on server" });
     }
     const body = req.body || {};
-    const amount = Number(body.amount);
-    const purpose = String(body.purpose || "payment");
+    const productId = String(body.product || body.ebook || "").trim();
+    const ebook = productId ? ebooks.getProduct(productId) : null;
+
+    let amount = Number(body.amount);
+    let purpose = String(body.purpose || "payment");
     const plan = String(body.plan || "");
     const cycle = String(body.cycle || "");
-    const label = String(body.label || "WorkPilot Tools");
-    const receipt = "wp_" + purpose + "_" + Date.now();
-
-    const order = await razorpay.createOrder(amount, receipt, {
+    let label = String(body.label || "WorkPilot Tools");
+    let receipt = "wp_" + purpose + "_" + Date.now();
+    let notes = {
       purpose,
       plan,
       cycle,
       source: String(body.source || ""),
-    });
+    };
+
+    if (ebook) {
+      amount = ebook.pricePaise;
+      purpose = "ebook";
+      label = ebook.title + " — MarketMind Labs eBook";
+      receipt = "ebook_" + ebook.id + "_" + Date.now();
+      notes = {
+        purpose: "ebook",
+        product: ebook.id,
+        source: String(body.source || ""),
+      };
+    }
+
+    if (!amount || amount < 100) {
+      return res.status(400).json({ error: "Invalid payment amount" });
+    }
+
+    const order = await razorpay.createOrder(amount, receipt, notes);
 
     const pub = razorpay.getPublicConfig();
     res.json({
@@ -119,18 +163,20 @@ app.post("/api/payments/order", async function (req, res) {
       keyId: pub.keyId,
       name: pub.name,
       description: label,
+      product: ebook ? ebook.id : undefined,
     });
   } catch (e) {
     res.status(400).json({ error: e.message || "Failed to create order" });
   }
 });
 
-app.post("/api/payments/verify", function (req, res) {
+app.post("/api/payments/verify", async function (req, res) {
   try {
     const body = req.body || {};
     const orderId = body.razorpay_order_id;
     const paymentId = body.razorpay_payment_id;
     const signature = body.razorpay_signature;
+    const productId = String(body.product || body.ebook || "").trim();
 
     if (!orderId || !paymentId || !signature) {
       return res.status(400).json({ error: "Missing payment fields" });
@@ -139,7 +185,23 @@ app.post("/api/payments/verify", function (req, res) {
     const ok = razorpay.verifyPaymentSignature(orderId, paymentId, signature);
     if (!ok) return res.status(400).json({ error: "Invalid payment signature" });
 
-    console.log("Payment verified:", orderId, paymentId);
+    console.log("Payment verified:", orderId, paymentId, productId || "(general)");
+
+    if (productId) {
+      if (!ebooks.getDownloadSecret()) {
+        return res.status(503).json({ error: "Download signing not configured on server" });
+      }
+      const client = razorpay.getClient();
+      await ebooks.validateOrderForProduct(client, orderId, productId);
+      const downloadToken = ebooks.signDownloadToken(productId, orderId, paymentId);
+      return res.json({
+        ok: true,
+        product: productId,
+        downloadToken: downloadToken,
+        purchaseKey: ebooks.hashPurchaseKey(orderId, paymentId),
+      });
+    }
+
     res.json({ ok: true });
   } catch (e) {
     res.status(400).json({ error: e.message || "Verification failed" });

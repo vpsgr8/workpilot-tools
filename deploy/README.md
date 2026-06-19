@@ -41,6 +41,8 @@ Deploy BizBuilt on a customer's Google Cloud project with their domain.
 
 **Endpoints:** `GET /api/payments/config`, `POST /api/payments/order`, `POST /api/payments/verify`
 
+**Paid eBooks:** `GET /api/ebooks/catalog`, `GET /api/ebooks/download?token=…` — full PDFs live in `server/ebooks/` (not public static). Set `JWT_SECRET` or `EBOOK_DOWNLOAD_SECRET` for signed download tokens. Add `https://englishlearner.store` and `https://logictrade.site` to `CORS_ORIGINS`.
+
 Until `apiUrl` is set on the live site, donate buttons fall back to your Razorpay.me link.
 
 ## Quick start (local API dev)
