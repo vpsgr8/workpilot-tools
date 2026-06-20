@@ -50,6 +50,7 @@ function blogHtml(article, tool) {
 <meta name="keywords" content="${esc(kw)}">
 <link rel="canonical" href="${url}">
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="robots" content="noindex, follow">
 <link rel="stylesheet" href="../assets/tailwind.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-GMEBH16Y2M"></script>
@@ -256,6 +257,7 @@ function landingPageHtml(tool, relatedTools, blogLinks, appPath) {
 <meta property="og:image" content="${SITE}/assets/og-default.png">
 <meta property="og:site_name" content="WorkPilot Tools">
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="robots" content="noindex, follow">
 <link rel="stylesheet" href="../assets/tailwind.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
 <style>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');body{font-family:'Inter',sans-serif}</style>
