@@ -69,6 +69,34 @@ html[data-theme="dark"] .wp-brand-text small {
   color: var(--wp-muted, #9ca3af);
 }
 
+.wp-site-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  font-size: 13px;
+  max-width: 100%;
+}
+
+.wp-site-nav a {
+  color: var(--wp-muted, var(--muted, #5b6472));
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.wp-site-nav a:hover {
+  color: var(--wp-brand, var(--brand, #4f46e5));
+}
+
+@media (max-width: 768px) {
+  .wp-site-nav {
+    width: 100%;
+    order: 3;
+    padding-top: 6px;
+    border-top: 1px solid var(--wp-line, var(--line, #e5e7eb));
+  }
+}
+
 .wp-app-topbar {
   position: sticky;
   top: 0;

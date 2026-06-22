@@ -113,6 +113,72 @@
     );
   }
 
+  function hasHealthNav(header) {
+    return !!header.querySelector('a[href*="health-tools"]');
+  }
+
+  var SITE_NAV = [
+    { label: "PDF", path: "pdf-tools.html" },
+    { label: "AI", path: "ai-tools.html" },
+    { label: "Image", path: "image-tools.html" },
+    { label: "Audio", path: "audio-tools.html" },
+    { label: "Video", path: "video-tools.html" },
+    { label: "Business", path: "business-tools.html" },
+    { label: "Finance", path: "finance-tools.html" },
+    { label: "Pregnancy", path: "pregnancy-tools.html" },
+    { label: "Baby", path: "baby-parenting-tools.html" },
+    { label: "Health", path: "health-tools.html" },
+    { label: "Blog", path: "blog/index.html" },
+  ];
+
+  function injectSiteNav() {
+    var header = document.querySelector("header");
+    if (!header || header.dataset.wpNavPatched) return;
+
+    var prefix = depthPrefix();
+    var path = location.pathname.replace(/\\/g, "/");
+    var navBar = header.querySelector(".nav-links, .links");
+
+    if (navBar) {
+      if (!hasHealthNav(header)) {
+        var health = document.createElement("a");
+        health.href = prefix + "health-tools.html";
+        health.textContent = "Health";
+        var blog = navBar.querySelector('a[href*="blog"]');
+        if (blog) navBar.insertBefore(health, blog);
+        else navBar.appendChild(health);
+      }
+      header.dataset.wpNavPatched = "1";
+      return;
+    }
+
+    if (path.indexOf("/tools/") === -1) return;
+    if (header.querySelector(".wp-site-nav")) {
+      header.dataset.wpNavPatched = "1";
+      return;
+    }
+
+    var nav = document.createElement("nav");
+    nav.className = "wp-site-nav";
+    nav.setAttribute("aria-label", "Site categories");
+    SITE_NAV.forEach(function (item) {
+      var a = document.createElement("a");
+      a.href = prefix + item.path;
+      a.textContent = item.label;
+      nav.appendChild(a);
+    });
+
+    var flex = header.querySelector(".max-w-6xl") || header.querySelector("div");
+    var themeBtn = header.querySelector(".wp-theme-toggle");
+    if (flex) {
+      if (themeBtn) flex.insertBefore(nav, themeBtn);
+      else flex.appendChild(nav);
+    } else {
+      header.appendChild(nav);
+    }
+    header.dataset.wpNavPatched = "1";
+  }
+
   function stripTopNavLinks() {
     var header = document.querySelector("header");
     if (!header) return;
@@ -263,6 +329,7 @@
     injectAppTopbar();
     patchHeaderBrand();
     stripTopNavLinks();
+    injectSiteNav();
     injectHomeButton();
     patchFooterLinks();
     if (!window.RazorpayPay && !document.querySelector('script[src*="razorpay-payments.js"]')) {
