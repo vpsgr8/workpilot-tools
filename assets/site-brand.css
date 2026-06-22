@@ -88,6 +88,20 @@ html[data-theme="dark"] .wp-brand-text small {
   color: var(--wp-brand, var(--brand, #4f46e5));
 }
 
+.wp-tool-header {
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  row-gap: 10px;
+}
+
+.wp-tool-header > .wp-site-nav {
+  flex: 1 1 100%;
+  width: 100%;
+  padding-top: 8px;
+  margin-top: 2px;
+  border-top: 1px solid var(--wp-line, var(--line, #e5e7eb));
+}
+
 @media (max-width: 768px) {
   .wp-site-nav {
     width: 100%;

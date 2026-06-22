@@ -113,10 +113,6 @@
     );
   }
 
-  function hasHealthNav(header) {
-    return !!header.querySelector('a[href*="health-tools"]');
-  }
-
   var SITE_NAV = [
     { label: "PDF", path: "pdf-tools.html" },
     { label: "AI", path: "ai-tools.html" },
@@ -131,6 +127,44 @@
     { label: "Blog", path: "blog/index.html" },
   ];
 
+  function syncSiteNav(navBar, prefix) {
+    var themeBtn = navBar.querySelector(".wp-theme-toggle");
+    navBar.innerHTML = "";
+    if (themeBtn) navBar.appendChild(themeBtn);
+    SITE_NAV.forEach(function (item) {
+      var a = document.createElement("a");
+      a.href = prefix + item.path;
+      a.textContent = item.label;
+      navBar.appendChild(a);
+    });
+  }
+
+  function injectToolPageNav(header, prefix) {
+    var flex = header.querySelector(".max-w-6xl") || header.querySelector("div");
+    if (!flex) return;
+
+    flex.querySelectorAll("nav:not(.wp-site-nav)").forEach(function (n) {
+      n.remove();
+    });
+
+    var nav = header.querySelector(".wp-site-nav");
+    if (!nav) {
+      nav = document.createElement("nav");
+      nav.className = "wp-site-nav";
+      nav.setAttribute("aria-label", "Site categories");
+      flex.classList.add("wp-tool-header");
+      flex.appendChild(nav);
+    }
+
+    nav.innerHTML = "";
+    SITE_NAV.forEach(function (item) {
+      var a = document.createElement("a");
+      a.href = prefix + item.path;
+      a.textContent = item.label;
+      nav.appendChild(a);
+    });
+  }
+
   function injectSiteNav() {
     var header = document.querySelector("header");
     if (!header || header.dataset.wpNavPatched) return;
@@ -140,43 +174,15 @@
     var navBar = header.querySelector(".nav-links, .links");
 
     if (navBar) {
-      if (!hasHealthNav(header)) {
-        var health = document.createElement("a");
-        health.href = prefix + "health-tools.html";
-        health.textContent = "Health";
-        var blog = navBar.querySelector('a[href*="blog"]');
-        if (blog) navBar.insertBefore(health, blog);
-        else navBar.appendChild(health);
-      }
+      syncSiteNav(navBar, prefix);
       header.dataset.wpNavPatched = "1";
       return;
     }
 
-    if (path.indexOf("/tools/") === -1) return;
-    if (header.querySelector(".wp-site-nav")) {
+    if (path.indexOf("/tools/") !== -1) {
+      injectToolPageNav(header, prefix);
       header.dataset.wpNavPatched = "1";
-      return;
     }
-
-    var nav = document.createElement("nav");
-    nav.className = "wp-site-nav";
-    nav.setAttribute("aria-label", "Site categories");
-    SITE_NAV.forEach(function (item) {
-      var a = document.createElement("a");
-      a.href = prefix + item.path;
-      a.textContent = item.label;
-      nav.appendChild(a);
-    });
-
-    var flex = header.querySelector(".max-w-6xl") || header.querySelector("div");
-    var themeBtn = header.querySelector(".wp-theme-toggle");
-    if (flex) {
-      if (themeBtn) flex.insertBefore(nav, themeBtn);
-      else flex.appendChild(nav);
-    } else {
-      header.appendChild(nav);
-    }
-    header.dataset.wpNavPatched = "1";
   }
 
   function stripTopNavLinks() {
